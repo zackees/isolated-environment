@@ -12,6 +12,7 @@ Like Pipx, but allows creation of an explicit virtual environment and incrementa
 
 ```python
 from pathlib import Path
+import subprocess
 
 CUDA_VERSION = "cu121"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
@@ -19,11 +20,12 @@ EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 from isolated_environment import IsolatedEnvironment
 
-iso_env = IsolatedEnvironment(HERE / 'myenvironment')
+iso_env = IsolatedEnvironment(HERE / 'whisper_env')
 iso_env.install_environment()
 iso_env.pip_install('torch==2.1.2', EXTRA_INDEX_URL)
 iso_env.pip_install('openai-whisper')
-iso_env.run(['whisper', '--help'])
+env = iso_env.environment()
+subprocess.run(['whisper', '--help'], env=env, shell=True, check=True)
 ```
 
 # Development
