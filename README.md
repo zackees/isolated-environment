@@ -36,6 +36,9 @@ venv = iso_env.environment()
 subprocess.run(['whisper', '--help'], env=venv, shell=True, check=True)
 ```
 
+# Why not just use `venv` directly?
+
+You can! But this package is a better abstraction and solves the platform specific footguns that `venv` makes you go through to work correctly on all platforms.
 
 # Background
 
