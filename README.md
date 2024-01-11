@@ -1,7 +1,7 @@
 # isolated-environment
 
 ```bash
-pip install isolate-environment
+pip install isolated-environment
 ```
 
 [![Linting](../../actions/workflows/lint.yml/badge.svg)](../../actions/workflows/lint.yml)
