@@ -20,9 +20,6 @@ def _create_virtual_env(env_path: Path) -> Path:
     venv.create(env_path, with_pip=True)
     env_name = env_path.name
     print(f"Virtual environment '{env_name}' created at {env_path}")
-    if sys.platform != "win32":
-        # chmod for executable privileges.
-        env_path.chmod(0o755)
     return env_path
 
 
@@ -39,7 +36,12 @@ def _pip_install(env_path: Path, package: str, extra_index: str | None = None) -
     """Installs a package in the virtual environment."""
     # Activate the environment and install packages
     activate_bin = _get_activate_bin(env_path)
-    cmd_list = [str(activate_bin), "&&", "pip", "install", package]
+    cmd_list: list[str] = []
+    if sys.platform != "win32":
+        cmd_list += ["source", str(activate_bin)]
+    else:
+        cmd_list += ["call", str(activate_bin)]
+    cmd_list += ["&&", "pip", "install", package]
     if extra_index:
         cmd_list.extend(["--extra-index-url", extra_index])
     cmd = subprocess.list2cmdline(cmd_list)
