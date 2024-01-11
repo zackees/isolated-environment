@@ -17,6 +17,7 @@ dependency conflicts.
 
 # Example:
 
+
 ```python
 from pathlib import Path
 import subprocess
@@ -35,6 +36,7 @@ venv = iso_env.environment()
 subprocess.run(['whisper', '--help'], env=venv, shell=True, check=True)
 ```
 
+
 # Background
 
 After making my first major AI project `transcribe-anything` I quickly learned that `pytorch` has a lot of different versions of
@@ -43,7 +45,9 @@ of the box in Windows, pytorch does not support `cuda` acceleration, you have to
 done right the first time, you will get a cpu-only version of pytorch which is tricky to remove from the `site-packages` directory, requiring
 the developer to `pip uninstall` all packages using `pytorch` and then purge the `pip` cache.
 
-This is a real world example of how I was able to purge the cpu-pytorch from Windows, which took me a lot of trial and error to figure out:
+This is a real world example of how I was able to purge the cpu-pytorch from Windows, which took me a lot of trial and error to figure out.
+
+*Without this library, you would have to do something like this to purge cpu-pytorch from the global `site-packages`*
 
 ```python
     uninstall = [
@@ -58,6 +62,7 @@ This is a real world example of how I was able to purge the cpu-pytorch from Win
         subprocess.run(["pip", "uninstall", "-y", package], check=True)
     subprocess.run(["pip", "cache", "purge"], check=True)
 ```
+...yuck
 
 This means that if I install one tool and force the correct dependencies in, another tool relying on those dependencies will **BREAK**.
 
