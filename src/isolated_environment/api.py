@@ -26,10 +26,12 @@ def _create_virtual_env(env_path: Path) -> Path:
 def _pip_install(env_path: Path, package: str, extra_index: str | None = None) -> None:
     """Installs a package in the virtual environment."""
     # Activate the environment and install packages
-    activate_bin = env_path / "bin" / "activate"
+    cmd_list = []
     if sys.platform == "win32":
-        activate_bin = env_path / "Scripts" / "activate.bat"
-    cmd_list = [str(activate_bin), "&&", "pip", "install", package]
+        cmd_list += [str(env_path / "Scripts" / "activate.bat")]
+    else:
+        cmd_list += ["/bin/bash", str(env_path / "bin" / "activate")]
+    cmd_list += ["&&", "pip", "install", package]
     if extra_index:
         cmd_list.extend(["--extra-index-url", extra_index])
     cmd = subprocess.list2cmdline(cmd_list)
