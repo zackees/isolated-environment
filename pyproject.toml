@@ -13,7 +13,7 @@ dependencies = [
     "wheel"
 ]
 # Change this with the version number bump.
-version = "1.0.0"
+version = "1.0.1"
 
 [tool.ruff]
 line-length = 200

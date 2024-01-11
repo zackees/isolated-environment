@@ -64,9 +64,13 @@ class IsolatedEnvironment:
         ), f"The environment {self.env_path} doesn't exist, install it first."
         _pip_install(self.env_path, package, extra_index)
 
+    def environment(self) -> dict[str, str]:
+        """Gets the activated environment, which should be applied to subprocess environments."""
+        return _get_activated_environment(self.env_path)
+
     def run(self, cmd_list: list[str]) -> int:
         """Runs a command in the environment."""
-        env = _get_activated_environment(self.env_path)
+        env = self.environment()
         cmd = subprocess.list2cmdline(cmd_list)
         if self.verbose:
             print(f"Running: {cmd}")
