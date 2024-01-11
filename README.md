@@ -12,6 +12,9 @@ pip install isolated-environment
 This is a package isolation library designed specifically for AI developers to solve the problems
 of AI dependency conflicts introduced by the various `pytorch` incompatibilities within and between AI apps.
 
+In plain words, this package allows you to install your AI apps globally without having to worry about `pytorch`
+dependency conflicts.
+
 # Example:
 
 ```python
