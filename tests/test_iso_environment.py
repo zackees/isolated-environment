@@ -20,8 +20,8 @@ class IsolatedEnvironmentTest(unittest.TestCase):
         with TemporaryDirectory() as tmp_dir:
             iso_env = IsolatedEnvironment(Path(tmp_dir) / "venv")
             iso_env.install_environment()
-            iso_env.pip_install("whisper")
-            rtn = iso_env.run(["whisper", "--help"])
+            iso_env.pip_install("static-ffmpeg")
+            rtn = iso_env.run(["static_ffmpeg", "--help"])
             self.assertEqual(0, rtn)
 
 
