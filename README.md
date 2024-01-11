@@ -1,17 +1,16 @@
 # isolated-environment
 
-```bash
-pip install isolated-environment
-```
-
 [![Linting](../../actions/workflows/lint.yml/badge.svg)](../../actions/workflows/lint.yml)
-
 [![MacOS_Tests](../../actions/workflows/push_macos.yml/badge.svg)](../../actions/workflows/push_macos.yml)
 [![Ubuntu_Tests](../../actions/workflows/push_ubuntu.yml/badge.svg)](../../actions/workflows/push_ubuntu.yml)
 [![Win_Tests](../../actions/workflows/push_win.yml/badge.svg)](../../actions/workflows/push_win.yml)
 
+```bash
+pip install isolated-environment
+```
+
 This is a package isolation library designed specifically for AI developers to solve the problems
-of AI dependency conflicts introduced by the various pytorch incompatibilities within an AI project.
+of AI dependency conflicts introduced by the various `pytorch` incompatibilities within and between AI apps.
 
 # Example:
 
@@ -29,8 +28,8 @@ iso_env = IsolatedEnvironment(HERE / 'whisper_env')
 iso_env.install_environment()
 iso_env.pip_install('torch==2.1.2', EXTRA_INDEX_URL)
 iso_env.pip_install('openai-whisper')
-env = iso_env.environment()
-subprocess.run(['whisper', '--help'], env=env, shell=True, check=True)
+venv = iso_env.environment()
+subprocess.run(['whisper', '--help'], env=venv, shell=True, check=True)
 ```
 
 # Background
