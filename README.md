@@ -4,14 +4,14 @@
 pip install isolate-environment
 ```
 
-This is a package isolation library designed specifically for AI developers to solve the problems
-of AI dependency conflicts introduced by the various pytorch incompatibilities within an AI project.
-
 [![Linting](../../actions/workflows/lint.yml/badge.svg)](../../actions/workflows/lint.yml)
 
 [![MacOS_Tests](../../actions/workflows/push_macos.yml/badge.svg)](../../actions/workflows/push_macos.yml)
 [![Ubuntu_Tests](../../actions/workflows/push_ubuntu.yml/badge.svg)](../../actions/workflows/push_ubuntu.yml)
 [![Win_Tests](../../actions/workflows/push_win.yml/badge.svg)](../../actions/workflows/push_win.yml)
+
+This is a package isolation library designed specifically for AI developers to solve the problems
+of AI dependency conflicts introduced by the various pytorch incompatibilities within an AI project.
 
 # Example:
 
