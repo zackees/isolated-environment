@@ -23,24 +23,18 @@ def _create_virtual_env(env_path: Path) -> Path:
     return env_path
 
 
-def _get_activate_bin(env_path: Path) -> Path:
+def _get_activate_bin_cmd_list(env_path: Path) -> list[str]:
     """Gets the activate binary for the environment."""
     if sys.platform == "win32":
-        out = env_path / "Scripts" / "activate.bat"
+        return ["call", str(env_path / "Scripts" / "activate.bat")]
     else:
-        out = env_path / "bin" / "activate"
-    return out
+        return ["/bin/bash", str(env_path / "bin" / "activate")]
 
 
 def _pip_install(env_path: Path, package: str, extra_index: str | None = None) -> None:
     """Installs a package in the virtual environment."""
     # Activate the environment and install packages
-    activate_bin = _get_activate_bin(env_path)
-    cmd_list: list[str] = []
-    if sys.platform != "win32":
-        cmd_list += ["/bin/bash", str(activate_bin)]
-    else:
-        cmd_list += ["call", str(activate_bin)]
+    cmd_list = _get_activate_bin_cmd_list(env_path)
     cmd_list += ["&&", "pip", "install", package]
     if extra_index:
         cmd_list.extend(["--extra-index-url", extra_index])
@@ -69,10 +63,8 @@ class IsolatedEnvironment:
 
     def make_cmd_list(self, cmd_list: list[str]) -> list[str]:
         """Makes a command to run in the environment."""
-        activate_bin = self.env_path / "bin" / "activate"
-        if sys.platform == "win32":
-            activate_bin = self.env_path / "Scripts" / "activate.bat"
-        return [str(activate_bin), "&&", *cmd_list]
+        activate_cmd_list = _get_activate_bin_cmd_list(self.env_path)
+        return [*activate_cmd_list, "&&", *cmd_list]
 
     def run(self, cmd_list: list[str]) -> int:
         """Runs a command in the environment."""
