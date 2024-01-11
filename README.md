@@ -119,7 +119,7 @@ Run `./lint.sh` to find linting errors using `ruff`, `flake8` and `mypy`.
 This software is free to use for personal and commercial products. However, if you make changes to `isolated-environment` code you must agree to the
 following "good-samaritan" stipulations:
 
-  * All changes to `isolated-environment` **MUST** be put into a github fork, linked to this project.
+  * All changes to `isolated-environment` **MUST** be put into a github fork, linked to this github project (https://github.com/zackees/isolated-environment).
     * That means clicking on the fork button on this repo, and then putting your changes into that fork.
 
 This agreement means that `isolated-environment` can receive additional features from those that benefit from this package, so that others can benefit as well.
