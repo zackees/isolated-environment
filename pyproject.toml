@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "isolated-environment"
+description = "Like Pipx, but allows creation of a virtual environment then populating it."
+requires-python = ">=3.7"
+keywords = ["template-python-cmd"]
+license = { text = "BSD 3-Clause License" }
+classifiers = ["Programming Language :: Python :: 3"]
+dependencies = [
+
+]
+# Change this with the version number bump.
+version = "1.0.0"
+
+[tool.ruff]
+line-length = 200
+
+[tool.pylint."MESSAGES CONTROL"]
+good-names = [
+    "c",
+    "i",
+    "ok",
+    "id",
+    "e",
+    "f"
+]
+disable = [
+    "missing-function-docstring",
+    "missing-module-docstring"
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+ignore_missing_imports = true
+disable_error_code = ["import-untyped"]
+
+# [project.scripts]
+# isolated-environment = "isolated_environment.cli:main"

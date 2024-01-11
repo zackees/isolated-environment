@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+. ./activate.sh
+echo "Running unittests"
+python -m unittest discover -s tests -p "*test*.py"
