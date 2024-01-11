@@ -38,7 +38,7 @@ def _pip_install(env_path: Path, package: str, extra_index: str | None = None) -
     activate_bin = _get_activate_bin(env_path)
     cmd_list: list[str] = []
     if sys.platform != "win32":
-        cmd_list += ["source", str(activate_bin)]
+        cmd_list += ["/bin/bash", str(activate_bin)]
     else:
         cmd_list += ["call", str(activate_bin)]
     cmd_list += ["&&", "pip", "install", package]
