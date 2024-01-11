@@ -14,6 +14,8 @@ from pathlib import Path
 def _create_virtual_env(env_path: Path) -> Path:
     """Creates an empty virtual environment in the current directory using venv."""
 
+    # Create parent directories
+    env_path.parent.mkdir(parents=True, exist_ok=True)
     # Create the virtual environment
     venv.create(env_path, with_pip=True)
     env_name = env_path.name
