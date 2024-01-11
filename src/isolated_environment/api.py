@@ -5,11 +5,10 @@ then populate it with packages incrementally. Also allows the
 ability to run commands in the environment.
 """
 
-
-import sys
 import subprocess
-from pathlib import Path
+import sys
 import venv
+from pathlib import Path
 
 
 def _create_virtual_env(env_path: Path) -> Path:
@@ -28,15 +27,9 @@ def _pip_install(env_path: Path, package: str, extra_index: str | None = None) -
     activate_bin = env_path / "bin" / "activate"
     if sys.platform == "win32":
         activate_bin = env_path / "Scripts" / "activate.bat"
-    cmd_list = [
-        activate_bin,
-        "&&",
-        'pip',
-        'install',
-        package
-    ]
+    cmd_list = [str(activate_bin), "&&", "pip", "install", package]
     if extra_index:
-        cmd_list.extend(['--extra-index-url', extra_index])
+        cmd_list.extend(["--extra-index-url", extra_index])
     cmd = subprocess.list2cmdline(cmd_list)
     print(f"Running: {cmd}")
     subprocess.run(cmd, shell=True, check=True)
@@ -44,31 +37,33 @@ def _pip_install(env_path: Path, package: str, extra_index: str | None = None) -
 
 class IsolatedEnvironment:
     """An isolated environment."""
+
     def __init__(self, env_path: Path, verbose: bool = False) -> None:
         self.env_path = env_path
         self.verbose = verbose
-    
+
     def install_environment(self) -> None:
         """Installs the environment."""
         self.env_path = _create_virtual_env(self.env_path)
 
     def pip_install(self, package: str, extra_index: str | None = None) -> None:
         """Installs a package in the virtual environment."""
-        assert self.env_path.exists(), f"The environment {self.env_path} doesn't exist, install it first."
+        assert (
+            self.env_path.exists()
+        ), f"The environment {self.env_path} doesn't exist, install it first."
         _pip_install(self.env_path, package, extra_index)
 
-    def run(self, cmd_list: list[str]) -> int:
-        """Runs a command in the environment."""
+    def make_cmd_list(self, cmd_list: list[str]) -> list[str]:
+        """Makes a command to run in the environment."""
         activate_bin = self.env_path / "bin" / "activate"
         if sys.platform == "win32":
             activate_bin = self.env_path / "Scripts" / "activate.bat"
-        cmd = subprocess.list2cmdline(
-            [
-                activate_bin,
-                "&&",
-                *cmd_list
-            ]
-        )
+        return [str(activate_bin), "&&", *cmd_list]
+
+    def run(self, cmd_list: list[str]) -> int:
+        """Runs a command in the environment."""
+        cmd_list = self.make_cmd_list(cmd_list)
+        cmd = subprocess.list2cmdline(cmd_list)
         if self.verbose:
             print(f"Running: {cmd}")
-        return subprocess.run(cmd, shell=True, check=True)
+        return subprocess.run(cmd, shell=True, check=True).returncode
