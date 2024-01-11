@@ -5,6 +5,7 @@ then populate it with packages incrementally. Also allows the
 ability to run commands in the environment.
 """
 
+import os
 import subprocess
 import sys
 import venv
@@ -23,24 +24,26 @@ def _create_virtual_env(env_path: Path) -> Path:
     return env_path
 
 
-def _get_activate_bin_cmd_list(env_path: Path) -> list[str]:
-    """Gets the activate binary for the environment."""
+def _get_activated_environment(env_path: Path) -> dict[str, str]:
+    """Gets the activate environment for the environment."""
+    out_env = os.environ.copy()
     if sys.platform == "win32":
-        return ["call", str(env_path / "Scripts" / "activate.bat")]
+        out_env["PATH"] = str(env_path / "Scripts") + ";" + out_env["PATH"]
     else:
-        return ["/bin/bash", str(env_path / "bin" / "activate")]
+        out_env["PATH"] = str(env_path / "bin") + ":" + out_env["PATH"]
+    return out_env
 
 
 def _pip_install(env_path: Path, package: str, extra_index: str | None = None) -> None:
     """Installs a package in the virtual environment."""
     # Activate the environment and install packages
-    cmd_list = _get_activate_bin_cmd_list(env_path)
-    cmd_list += ["&&", "pip", "install", package]
+    env = _get_activated_environment(env_path)
+    cmd_list = ["pip", "install", package]
     if extra_index:
         cmd_list.extend(["--extra-index-url", extra_index])
     cmd = subprocess.list2cmdline(cmd_list)
     print(f"Running: {cmd}")
-    subprocess.run(cmd, shell=True, check=True)
+    subprocess.run(cmd, env=env, shell=True, check=True)
 
 
 class IsolatedEnvironment:
@@ -61,15 +64,10 @@ class IsolatedEnvironment:
         ), f"The environment {self.env_path} doesn't exist, install it first."
         _pip_install(self.env_path, package, extra_index)
 
-    def make_cmd_list(self, cmd_list: list[str]) -> list[str]:
-        """Makes a command to run in the environment."""
-        activate_cmd_list = _get_activate_bin_cmd_list(self.env_path)
-        return [*activate_cmd_list, "&&", *cmd_list]
-
     def run(self, cmd_list: list[str]) -> int:
         """Runs a command in the environment."""
-        cmd_list = self.make_cmd_list(cmd_list)
+        env = _get_activated_environment(self.env_path)
         cmd = subprocess.list2cmdline(cmd_list)
         if self.verbose:
             print(f"Running: {cmd}")
-        return subprocess.run(cmd, shell=True, check=True).returncode
+        return subprocess.run(cmd, env=env, shell=True, check=True).returncode
