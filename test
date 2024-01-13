@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+# cd to self bash script directory
+cd $( dirname ${BASH_SOURCE[0]})
+. ./activate.sh
+pytest

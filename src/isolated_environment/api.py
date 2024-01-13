@@ -55,7 +55,9 @@ class IsolatedEnvironment:
 
     def __init__(self, env_path: Path, verbose: bool = False) -> None:
         self.env_path = env_path
+        self.env_path.mkdir(parents=True, exist_ok=True)
         self.verbose = verbose
+        self.file_lock = FileLock(str(env_path) + ".lock")
 
     def install_environment(self) -> None:
         """Installs the environment."""
@@ -64,9 +66,11 @@ class IsolatedEnvironment:
     @contextmanager
     def lock(self) -> Iterator[None]:
         """Locks the environment to prevent it from being used."""
-        lock_path = str(self.env_path) + ".lock"
-        with FileLock(lock_path):
+        self.file_lock.acquire()
+        try:
             yield
+        finally:
+            self.file_lock.release()
 
     def pip_install(self, package: str, extra_index: str | None = None) -> None:
         """Installs a package in the virtual environment."""
