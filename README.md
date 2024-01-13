@@ -30,7 +30,8 @@ install.
 For example, if the computer supports cuda you may want to install `pytorch` with cuda support, a multi-gigabyte download. However
 if you are running the app on a CPU only machine you may opt for the tiny cpu only `pytorch`.
 
-The best example of using this library so far is `transcribe-anything`
+In plain words, this package allows you to install your AI apps globally without having to worry about `pytorch`
+dependency conflicts.
 
 # Example:
 
@@ -46,9 +47,10 @@ HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 from isolated_environment import IsolatedEnvironment
 
 iso_env = IsolatedEnvironment(HERE / 'whisper_env')
-iso_env.install_environment()
-iso_env.pip_install('torch==2.1.2', EXTRA_INDEX_URL)
-iso_env.pip_install('openai-whisper')
+with iso_env.lock():
+    iso_env.install_environment()
+    iso_env.pip_install('torch==2.1.2', EXTRA_INDEX_URL)
+    iso_env.pip_install('openai-whisper')
 venv = iso_env.environment()
 subprocess.run(['whisper', '--help'], env=venv, shell=True, check=True)
 ```

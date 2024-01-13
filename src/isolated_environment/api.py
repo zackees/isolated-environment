@@ -9,7 +9,11 @@ import os
 import subprocess
 import sys
 import venv
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
+
+from filelock import FileLock
 
 
 def _create_virtual_env(env_path: Path) -> Path:
@@ -56,6 +60,13 @@ class IsolatedEnvironment:
     def install_environment(self) -> None:
         """Installs the environment."""
         self.env_path = _create_virtual_env(self.env_path)
+
+    @contextmanager
+    def lock(self) -> Iterator[None]:
+        """Locks the environment to prevent it from being used."""
+        lock_path = str(self.env_path) + ".lock"
+        with FileLock(lock_path):
+            yield
 
     def pip_install(self, package: str, extra_index: str | None = None) -> None:
         """Installs a package in the virtual environment."""

@@ -19,10 +19,11 @@ class IsolatedEnvironmentTest(unittest.TestCase):
         """Test command line interface (CLI)."""
         with TemporaryDirectory() as tmp_dir:
             iso_env = IsolatedEnvironment(Path(tmp_dir) / "venv")
-            iso_env.install_environment()
-            iso_env.pip_install("static-ffmpeg")
-            rtn = iso_env.run(["static_ffmpeg", "--help"])
-            self.assertEqual(0, rtn)
+            with iso_env.lock():
+                iso_env.install_environment()
+                iso_env.pip_install("static-ffmpeg")
+                rtn = iso_env.run(["static_ffmpeg", "--help"])
+                self.assertEqual(0, rtn)
 
 
 if __name__ == "__main__":
