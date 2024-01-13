@@ -10,10 +10,16 @@ pip install isolated-environment
 ```
 
 This is a package isolation library designed specifically for AI developers to solve the problems
-of AI dependency conflicts introduced by the various `pytorch` incompatibilities within and between AI apps.
+of AI dependency conflicts introduced by the various `pytorch`/`tensorflow`/etc incompatibilities within and between AI apps.
 
-In plain words, this package allows you to install your AI apps globally without having to worry about `pytorch`
-dependency conflicts.
+Never make your users install your app with `--extra-index-url`. Handle as part of your app runtime instead.
+
+Complex dependencies that you would normally put as part of your `requirements.txt` file, are instead moved to the runtime. This greatly
+speeds up install of the app, though you pay the cost on first use. You can also use runtime configuration to determine what dependencies
+you want to install. For example, if the computer supports cuda you may want to install `pytorch` with cuda support, a multi-gigabyte download. However
+if you are running the app on a CPU only machine you may opt for the tiny cpu only `pytorch`.
+
+The best example of using this library so far is `transcribe-anything`
 
 # Example:
 
