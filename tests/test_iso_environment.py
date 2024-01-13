@@ -27,16 +27,20 @@ class IsolatedEnvironmentTest(unittest.TestCase):
         """Test command line interface (CLI)."""
         with TemporaryDirectory() as tmp_dir:
             iso_env = IsolatedEnvironment(Path(tmp_dir) / "venv")
+            deps = [
+                "static-ffmpeg",
+            ]
             print("pip_list_json before install")
             pip_list_json = pretty(iso_env.pip_list())
             print(pip_list_json)
             with iso_env.lock():
                 if not iso_env.installed():
                     iso_env.install_environment()
-                    iso_env.pip_install("static-ffmpeg")
+                    iso_env.pip_install(deps)
                     pip_list_json = pretty(iso_env.pip_list())
                     print("pip_list_json after install")
                     print(pip_list_json)
+                    self.assertTrue(iso_env.pip_has(deps))
             self.assertTrue(iso_env.installed())
             env = iso_env.environment()
             subprocess.check_output(["static_ffmpeg", "--help"], env=env, shell=True)

@@ -11,11 +11,22 @@ import shutil
 import subprocess
 import sys
 import venv
+import warnings
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
 from filelock import FileLock
+
+WARN_OPERATOR = [  # _todo: implement operator support
+    "==",
+    ">=",
+    "<=",
+    ">",
+    "<",
+    "~=",
+    "!=",
+]
 
 
 def _create_virtual_env(env_path: Path) -> Path:
@@ -50,6 +61,14 @@ def _pip_install(env_path: Path, package: str, extra_index: str | None = None) -
     cmd = subprocess.list2cmdline(cmd_list)
     print(f"Running: {cmd}")
     subprocess.run(cmd, env=env, shell=True, check=True)
+
+
+def _package_name(package: str) -> str:
+    """Splits a package into name and version."""
+    for f in WARN_OPERATOR:
+        if f in package:
+            return package.split(f)[0]
+    return package
 
 
 class IsolatedEnvironment:
@@ -88,12 +107,18 @@ class IsolatedEnvironment:
         finally:
             self.file_lock.release()
 
-    def pip_install(self, package: str, extra_index: str | None = None) -> None:
+    def pip_install(
+        self, package: str | list[str], extra_index: str | None = None
+    ) -> None:
         """Installs a package in the virtual environment."""
         assert (
             self.env_path.exists()
         ), f"The environment {self.env_path} doesn't exist, install it first."
-        _pip_install(self.env_path, package, extra_index)
+        if isinstance(package, list):
+            for p in package:
+                self.pip_install(p, extra_index)
+        elif isinstance(package, str):
+            _pip_install(self.env_path, package, extra_index)
 
     def environment(self) -> dict[str, str]:
         """Gets the activated environment, which should be applied to subprocess environments."""
@@ -125,3 +150,20 @@ class IsolatedEnvironment:
         stdout = completed.stdout
         out = json.loads(stdout)
         return out  # type: ignore
+
+    def pip_has(self, packages: list[str]) -> bool:
+        """Returns True if the packages are installed."""
+        pip_list = self.pip_list()
+        pip_list_names = [p["name"] for p in pip_list]  # type: ignore
+        for p in packages:
+            for f in WARN_OPERATOR:
+                if f in p:
+                    warnings.warn(
+                        f"Warning: The package {p} has an operator {f} in "
+                        + "it and we don't support version matching yet."
+                    )
+        for package in packages:
+            package_name = _package_name(package)
+            if package_name not in pip_list_names:
+                return False
+        return True
