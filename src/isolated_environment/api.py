@@ -7,6 +7,7 @@ ability to run commands in the environment.
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import venv
@@ -76,11 +77,7 @@ class IsolatedEnvironment:
     def clean(self) -> None:
         """Cleans the environment."""
         if self.env_path.exists():
-            if sys.platform == "win32":
-                (self.env_path / "Scripts").rmdir()
-            else:
-                (self.env_path / "bin").rmdir()
-            self.env_path.rmdir()
+            shutil.rmtree(self.env_path, ignore_errors=True)
 
     @contextmanager
     def lock(self) -> Iterator[None]:

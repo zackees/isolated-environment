@@ -37,8 +37,11 @@ class IsolatedEnvironmentTest(unittest.TestCase):
                     pip_list_json = pretty(iso_env.pip_list())
                     print("pip_list_json after install")
                     print(pip_list_json)
+            self.assertTrue(iso_env.installed())
             env = iso_env.environment()
             subprocess.check_output(["static_ffmpeg", "--help"], env=env, shell=True)
+            iso_env.clean()
+            self.assertFalse(iso_env.installed())
 
 
 if __name__ == "__main__":
