@@ -12,6 +12,9 @@ pip install isolated-environment
 This is a package isolation library designed specifically for AI developers to solve the problems
 of AI dependency conflicts introduced by the various `pytorch`/`tensorflow`/etc incompatibilities within and between AI apps.
 
+This library also makes it so that your app can be installed with `pip install <package>` instead of `pip install <package> --extra-index-url ...`, since
+this dependency is handled at the runtime of your app.
+
 Never make your users install your app with `--extra-index-url`. Handle as part of your app runtime instead.
 
 Complex dependencies that you would normally put as part of your `requirements.txt` file, are instead moved to the runtime. This greatly
