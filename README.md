@@ -12,14 +12,18 @@ pip install isolated-environment
 This is a package isolation library designed specifically for AI developers to solve the problems
 of AI dependency conflicts introduced by the various `pytorch`/`tensorflow`/etc incompatibilities within and between AI apps.
 
-This library also makes it so that your app can be installed with `pip install <package>` instead of `pip install <package> --extra-index-url ...`, since
-this dependency is handled at the runtime of your app.
+It also works for any other complex dependency chain. I made this library because `conda` has significant problems and messes up the system
+on Windows with its own version of git-bash, standard `pip` doesn't support
+implicit `--extra-index-url` so pretty much all AI apps have non-standard install processes. This really sucks. This library
+fixes all of this so that complex AI apps can simply be installed with plain old `pip`.
 
-Never make your users install your app with `--extra-index-url`. Handle as part of your app runtime instead.
+Instead of having your complex, version conflicting dependencies in your `requirements.txt` file, you'll move it to the runtime.
 
-Complex dependencies that you would normally put as part of your `requirements.txt` file, are instead moved to the runtime. This greatly
-speeds up install of the app, though you pay the cost on first use. You can also use runtime configuration to determine what dependencies
-you want to install. For example, if the computer supports cuda you may want to install `pytorch` with cuda support, a multi-gigabyte download. However
+This also allows your dependency chain to be installed lazily. For example, maybe your front end app has multiple backends (like `transcribe-anything`)
+and are dependent on whether `cuda` is installed on the system or not. With this library you can query the runtime and decide what you want to
+install.
+
+For example, if the computer supports cuda you may want to install `pytorch` with cuda support, a multi-gigabyte download. However
 if you are running the app on a CPU only machine you may opt for the tiny cpu only `pytorch`.
 
 The best example of using this library so far is `transcribe-anything`
@@ -49,6 +53,7 @@ subprocess.run(['whisper', '--help'], env=venv, shell=True, check=True)
 
 You can! But this package is a better abstraction and solves the platform specific footguns that `venv` makes you go through to work correctly on all platforms.
 
+
 # Background
 
 After making my first major AI project `transcribe-anything` I quickly learned that `pytorch` has a lot of different versions of
@@ -77,6 +82,11 @@ This is a real world example of how I was able to purge the cpu-pytorch from Win
 ...yuck
 
 This means that if I install one tool and force the correct dependencies in, another tool relying on those dependencies will **BREAK**.
+
+# Isn't this just yet another package manager?
+
+If this is a package manager, then so is bash and cmd.exe. Let's get real here. Also, if this library was part of the standard, we might
+not have needed `conda` or `pipx` or any of the other alt package managers to fill in the gaps of `pip`.
 
 ## `isolated-environment` vs `pipx`
 
