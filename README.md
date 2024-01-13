@@ -154,3 +154,8 @@ This agreement means that `isolated-environment` can receive additional features
 
 This supplemental licensing supersedes any language in the generic license attached. If you merely use `isolated-environment` as is, without modification,
 none of this supplemental license applies to you.
+
+# Releases
+
+  * 1.0.4 - Added `lock()`
+  * 1.0.0 - Initial release
