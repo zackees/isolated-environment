@@ -1,5 +1,8 @@
 # isolated-environment
 
+This is a package isolation library designed specifically for AI developers to solve the problems
+of AI dependency conflicts introduced by the various `pytorch`/`tensorflow`/etc incompatibilities within and between AI apps.
+
 [![Linting](https://github.com/zackees/isolated-environment/actions/workflows/lint.yml/badge.svg)](https://github.com/zackees/isolated-environment/actions/workflows/lint.yml)
 [![MacOS_Tests](https://github.com/zackees/isolated-environment/actions/workflows/push_macos.yml/badge.svg)](https://github.com/zackees/isolated-environment/actions/workflows/push_macos.yml)
 [![Ubuntu_Tests](https://github.com/zackees/isolated-environment/actions/workflows/push_ubuntu.yml/badge.svg)](https://github.com/zackees/isolated-environment/actions/workflows/push_ubuntu.yml)
@@ -8,9 +11,6 @@
 ```bash
 pip install isolated-environment
 ```
-
-This is a package isolation library designed specifically for AI developers to solve the problems
-of AI dependency conflicts introduced by the various `pytorch`/`tensorflow`/etc incompatibilities within and between AI apps.
 
 It moves the install of your chosen dependencies from **install time** to **runtime**. The benefit of this is that you can query the system
 and make choices on what needs to be installed. For example in `pip` you can't conditionally install packages based on whether `nvidia-smi` has
