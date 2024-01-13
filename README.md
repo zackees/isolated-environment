@@ -125,10 +125,6 @@ The downside is that it gets a bit trickier to access the tool installed in an `
 Another downside, but this also exists within `pipx` is that you can't directly call into Python code within the `isolated-environment`. The only interface that can be used
 at this point are command-based apis (anything that `subprocess.run` can invoke). But this is typical of all code that is isolated in its own environment.
 
-# Locking
-
-While `isolated-environment` doesn't use any locking, I recommend that you do if there is any chance your app will be used from multiple processes. I recommend the excellent `FileLock` library to achieve this.
-
 # Development
 
 ## Install
