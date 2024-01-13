@@ -46,14 +46,13 @@ EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 from isolated_environment import IsolatedEnvironment
 
-iso_env = IsolatedEnvironment(HERE / 'whisper_env')
+iso_env = IsolatedEnvironment(Path(HERE) / "ffmpeg-venv")
 with iso_env.lock():
-    if not iso_env.exists():
+    if not iso_env.installed():
         iso_env.install_environment()
-        iso_env.pip_install('torch==2.1.2', EXTRA_INDEX_URL)
-        iso_env.pip_install('openai-whisper')
-venv = iso_env.environment()
-subprocess.run(['whisper', '--help'], env=venv, shell=True, check=True)
+        iso_env.pip_install("static-ffmpeg")
+env = iso_env.environment()
+subprocess.check_output(["static_ffmpeg", "--help"], env=env, shell=True)
 ```
 
 # Why not just use `venv` directly?
@@ -158,6 +157,7 @@ none of this supplemental license applies to you.
 
 # Releases
 
+  * 1.0.6 - `exists` -> `installed()`, adds `pip_list()`, adds `clean()`
   * 1.0.5 - Added `exists()`
   * 1.0.4 - Added `lock()`
   * 1.0.0 - Initial release

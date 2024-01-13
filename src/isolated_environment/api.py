@@ -5,13 +5,14 @@ then populate it with packages incrementally. Also allows the
 ability to run commands in the environment.
 """
 
+import json
 import os
 import subprocess
 import sys
 import venv
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator
+from typing import Any, Iterator
 
 from filelock import FileLock
 
@@ -64,9 +65,22 @@ class IsolatedEnvironment:
         """Installs the environment."""
         self.env_path = _create_virtual_env(self.env_path)
 
-    def exists(self) -> bool:
-        """Returns True if the environment exists."""
-        return self.env_path.exists()
+    def installed(self) -> bool:
+        """Returns True if the environment is installed."""
+        if not self.env_path.exists():
+            return False
+        if sys.platform == "win32":
+            return self.env_path.exists() and (self.env_path / "Scripts").exists()
+        return self.env_path.exists() and (self.env_path / "bin").exists()
+
+    def clean(self) -> None:
+        """Cleans the environment."""
+        if self.env_path.exists():
+            if sys.platform == "win32":
+                (self.env_path / "Scripts").rmdir()
+            else:
+                (self.env_path / "bin").rmdir()
+            self.env_path.rmdir()
 
     @contextmanager
     def lock(self) -> Iterator[None]:
@@ -95,3 +109,22 @@ class IsolatedEnvironment:
         if self.verbose:
             print(f"Running: {cmd}")
         return subprocess.run(cmd, env=env, shell=True, check=True).returncode
+
+    def pip_list(self) -> dict[str, Any]:
+        """Returns a dictionary of installed packages."""
+        if not self.installed():
+            return {}
+        env = self.environment()
+        cmd_list = ["pip", "list", "--format", "json"]
+        cmd = subprocess.list2cmdline(cmd_list)
+        completed = subprocess.run(
+            cmd,
+            env=env,
+            shell=True,
+            check=True,
+            capture_output=True,
+            universal_newlines=True,
+        )
+        stdout = completed.stdout
+        out = json.loads(stdout)
+        return out  # type: ignore
