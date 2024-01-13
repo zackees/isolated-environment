@@ -57,6 +57,7 @@ class IsolatedEnvironment:
         self.env_path = env_path
         self.env_path.mkdir(parents=True, exist_ok=True)
         self.verbose = verbose
+        # file_lock is side-by-side with the environment.
         self.file_lock = FileLock(str(env_path) + ".lock")
 
     def install_environment(self) -> None:
