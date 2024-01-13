@@ -12,6 +12,10 @@ pip install isolated-environment
 This is a package isolation library designed specifically for AI developers to solve the problems
 of AI dependency conflicts introduced by the various `pytorch`/`tensorflow`/etc incompatibilities within and between AI apps.
 
+It moves the install of your chosen dependencies from **install time** to **runtime**. The benefit of this is that you can query the system
+and make choices on what needs to be installed. For example in `pip` you can't conditionally install packages based on whether `nvidia-smi` has
+been installed (indicating `cuda` acceleration), but with `isolated-environment` this is straightfoward.
+
 It also works for any other complex dependency chain. I made this library because `conda` has significant problems and messes up the system
 on Windows with its own version of git-bash, standard `pip` doesn't support
 implicit `--extra-index-url` so pretty much all AI apps have non-standard install processes. This really sucks. This library
@@ -118,6 +122,10 @@ The downside is that it gets a bit trickier to access the tool installed in an `
 
 Another downside, but this also exists within `pipx` is that you can't directly call into Python code within the `isolated-environment`. The only interface that can be used
 at this point are command-based apis (anything that `subprocess.run` can invoke). But this is typical of all code that is isolated in its own environment.
+
+# Locking
+
+While `isolated-environment` doesn't use any locking, I recommend that you do if there is any chance your app will be used from multiple processes. I recommend the excellent `FileLock` library to achieve this.
 
 # Development
 
