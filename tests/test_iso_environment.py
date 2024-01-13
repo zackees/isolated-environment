@@ -20,10 +20,11 @@ class IsolatedEnvironmentTest(unittest.TestCase):
         with TemporaryDirectory() as tmp_dir:
             iso_env = IsolatedEnvironment(Path(tmp_dir) / "venv")
             with iso_env.lock():
-                iso_env.install_environment()
-                iso_env.pip_install("static-ffmpeg")
-                rtn = iso_env.run(["static_ffmpeg", "--help"])
-                self.assertEqual(0, rtn)
+                if not iso_env.exists():
+                    iso_env.install_environment()
+                    iso_env.pip_install("static-ffmpeg")
+            rtn = iso_env.run(["static_ffmpeg", "--help"])
+            self.assertEqual(0, rtn)
 
 
 if __name__ == "__main__":

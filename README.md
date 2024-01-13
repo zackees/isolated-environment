@@ -48,9 +48,10 @@ from isolated_environment import IsolatedEnvironment
 
 iso_env = IsolatedEnvironment(HERE / 'whisper_env')
 with iso_env.lock():
-    iso_env.install_environment()
-    iso_env.pip_install('torch==2.1.2', EXTRA_INDEX_URL)
-    iso_env.pip_install('openai-whisper')
+    if not iso_env.exists():
+        iso_env.install_environment()
+        iso_env.pip_install('torch==2.1.2', EXTRA_INDEX_URL)
+        iso_env.pip_install('openai-whisper')
 venv = iso_env.environment()
 subprocess.run(['whisper', '--help'], env=venv, shell=True, check=True)
 ```
@@ -157,5 +158,6 @@ none of this supplemental license applies to you.
 
 # Releases
 
+  * 1.0.5 - Added `exists()`
   * 1.0.4 - Added `lock()`
   * 1.0.0 - Initial release

@@ -64,6 +64,10 @@ class IsolatedEnvironment:
         """Installs the environment."""
         self.env_path = _create_virtual_env(self.env_path)
 
+    def exists(self) -> bool:
+        """Returns True if the environment exists."""
+        return self.env_path.exists()
+
     @contextmanager
     def lock(self) -> Iterator[None]:
         """Locks the environment to prevent it from being used."""
