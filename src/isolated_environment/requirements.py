@@ -39,7 +39,7 @@ def comp(a: Any, b: Any) -> bool:
 
 
 @dataclass
-class Req:
+class ParsedReq:
     """Parsed requirement"""
 
     package_name: str
@@ -48,7 +48,7 @@ class Req:
     extra_index_url: str | None = None
 
     @staticmethod
-    def parse(requirement: str) -> "Req":
+    def parse(requirement: str) -> "ParsedReq":
         # Split the requirement string into package name, version and extra_index_url
         operator = None
         semversion = None
@@ -68,7 +68,7 @@ class Req:
         else:
             package_name = requirement
         # Return a new ParsedRequirement instance
-        return Req(package_name, operator, semversion, extra_index_url)
+        return ParsedReq(package_name, operator, semversion, extra_index_url)
 
     def compare(
         self,
@@ -86,25 +86,25 @@ class Req:
 
 
 @dataclass
-class Reqs:
+class ParsedReqs:
     """Parsed requirements"""
 
-    reqs: List[Req]
+    reqs: List[ParsedReq]
 
     def _has_pckg_str(self, line: str) -> bool:
-        req = Req.parse(line)
+        req = ParsedReq.parse(line)
         return all(
             r.compare(req.package_name, req.semversion, req.extra_index_url)
             for r in self.reqs
         )
 
-    def _has_pckg_req(self, req: Req) -> bool:
+    def _has_pckg_req(self, req: ParsedReq) -> bool:
         return all(
             r.compare(req.package_name, req.semversion, req.extra_index_url)
             for r in self.reqs
         )
 
-    def has(self, other: Union["Reqs", str, List[str]]) -> bool:
+    def has(self, other: Union["ParsedReqs", str, List[str]]) -> bool:
         if isinstance(other, str):
             return self._has_pckg_str(other)
         if isinstance(other, list):
@@ -114,26 +114,44 @@ class Reqs:
                 return False
         return True
 
-    def __contains__(self, other: Union["Reqs", str, List[str]]) -> bool:
+    def __contains__(self, other: Union["ParsedReqs", str, List[str]]) -> bool:
         return self.has(other)
 
     def __len__(self) -> int:
         return len(self.reqs)
 
-    def __getitem__(self, index: int) -> Req:
+    def __getitem__(self, index: int) -> ParsedReq:
         return self.reqs[index]
 
     def __iter__(self) -> Iterator[Any]:
         return iter(self.reqs)
 
 
-@dataclass
 class Requirements:
     """Requirements"""
 
-    packages: List[str]
+    def __init__(self, packages: list[str]) -> None:
+        self._packages = packages
+        self._parsed = self._parse()
 
-    def parse(self) -> Reqs:
+    def has(self, other: Union["Requirements", str, List[str]]) -> bool:
+        if isinstance(other, Requirements):
+            return self._parsed.has(other._parsed)  # pylint: disable=protected-access
+        return self._parsed.has(other)
+
+    def _parse(self) -> ParsedReqs:
         """Parses the requirements"""
-        reqs = [Req.parse(package) for package in self.packages]
-        return Reqs(reqs)
+        reqs = [ParsedReq.parse(package) for package in self._packages]
+        return ParsedReqs(reqs)
+
+    def __contains__(self, other: Union["Requirements", str, List[str]]) -> bool:
+        return self.has(other)
+
+    def __len__(self) -> int:
+        return len(self._parsed)
+
+    def __getitem__(self, index: int) -> ParsedReq:
+        return self._parsed[index]
+
+    def __iter__(self) -> Iterator[Any]:
+        return iter(self._parsed)

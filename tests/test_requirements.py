@@ -11,100 +11,86 @@ class RequirementsTesting(unittest.TestCase):
 
     def test_simple_requirements(self) -> None:
         """Tests simple requirements."""
-        requirements = Requirements(["package1", "package2", "package3"])
-        parsed_requirements = requirements.parse()
+        reqs = Requirements(["package1", "package2", "package3"])
 
-        for req in parsed_requirements:
+        for req in reqs:
             self.assertIn(req.package_name, ["package1", "package2", "package3"])
             self.assertIsNone(req.enum_operator)
             self.assertIsNone(req.semversion)
 
     def test_single_package_with_version(self) -> None:
         """Tests single package with version."""
-        requirements = Requirements(["package==1.0.0", "package2>=1.0.0"])
-        parsed_requirements = requirements.parse()
+        reqs = Requirements(["package==1.0.0", "package2>=1.0.0"])
 
-        self.assertEqual(len(parsed_requirements), 2)
-        self.assertEqual(parsed_requirements[0].package_name, "package")
-        self.assertEqual(parsed_requirements[0].enum_operator, "==")
-        self.assertEqual(parsed_requirements[0].semversion, "1.0.0")
+        self.assertEqual(len(reqs), 2)
+        self.assertEqual(reqs[0].package_name, "package")
+        self.assertEqual(reqs[0].enum_operator, "==")
+        self.assertEqual(reqs[0].semversion, "1.0.0")
 
     def test_package_with_greater_less_not_equal_operators(self) -> None:
         """Tests package with greater than, less than, and not equal to operators."""
-        requirements = Requirements(
-            ["package1>1.0.0", "package2<2.0.0", "package3!=3.0.0"]
-        )
-        parsed_requirements = requirements.parse()
+        reqs = Requirements(["package1>1.0.0", "package2<2.0.0", "package3!=3.0.0"])
 
-        self.assertEqual(len(parsed_requirements), 3)
-        self.assertEqual(parsed_requirements[0].package_name, "package1")
-        self.assertEqual(parsed_requirements[0].enum_operator, ">")
-        self.assertEqual(parsed_requirements[0].semversion, "1.0.0")
-        self.assertEqual(parsed_requirements[1].package_name, "package2")
-        self.assertEqual(parsed_requirements[1].enum_operator, "<")
-        self.assertEqual(parsed_requirements[1].semversion, "2.0.0")
-        self.assertEqual(parsed_requirements[2].package_name, "package3")
-        self.assertEqual(parsed_requirements[2].enum_operator, "!=")
-        self.assertEqual(parsed_requirements[2].semversion, "3.0.0")
+        self.assertEqual(len(reqs), 3)
+        self.assertEqual(reqs[0].package_name, "package1")
+        self.assertEqual(reqs[0].enum_operator, ">")
+        self.assertEqual(reqs[0].semversion, "1.0.0")
+        self.assertEqual(reqs[1].package_name, "package2")
+        self.assertEqual(reqs[1].enum_operator, "<")
+        self.assertEqual(reqs[1].semversion, "2.0.0")
+        self.assertEqual(reqs[2].package_name, "package3")
+        self.assertEqual(reqs[2].enum_operator, "!=")
+        self.assertEqual(reqs[2].semversion, "3.0.0")
 
     def test_package_with_greater_less_equal_operators(self) -> None:
         """Tests package with greater than or equal to, and less than or equal to operators."""
-        requirements = Requirements(["package1>=1.0.0", "package2<=2.0.0"])
-        parsed_requirements = requirements.parse()
+        reqs = Requirements(["package1>=1.0.0", "package2<=2.0.0"])
 
-        self.assertEqual(len(parsed_requirements), 2)
-        self.assertEqual(parsed_requirements[0].package_name, "package1")
-        self.assertEqual(parsed_requirements[0].enum_operator, ">=")
-        self.assertEqual(parsed_requirements[0].semversion, "1.0.0")
-        self.assertEqual(parsed_requirements[1].package_name, "package2")
-        self.assertEqual(parsed_requirements[1].enum_operator, "<=")
-        self.assertEqual(parsed_requirements[1].semversion, "2.0.0")
+        self.assertEqual(len(reqs), 2)
+        self.assertEqual(reqs[0].package_name, "package1")
+        self.assertEqual(reqs[0].enum_operator, ">=")
+        self.assertEqual(reqs[0].semversion, "1.0.0")
+        self.assertEqual(reqs[1].package_name, "package2")
+        self.assertEqual(reqs[1].enum_operator, "<=")
+        self.assertEqual(reqs[1].semversion, "2.0.0")
 
     def test_extra_index_url_mismatch(self) -> None:
         """Tests extra index url mismatch."""
-        requirements = Requirements(
+        reqs = Requirements(
             [
                 "package1==1.0.0 --extra-index-url https://pypi.org/simple",
                 "package2>=1.0.0 --extra-index-url https://test.pypi.org/simple",
             ]
         )
-        parsed_requirements = requirements.parse()
 
-        self.assertEqual(len(parsed_requirements), 2)
-        self.assertEqual(parsed_requirements[0].package_name, "package1")
-        self.assertEqual(parsed_requirements[0].enum_operator, "==")
-        self.assertEqual(parsed_requirements[0].semversion, "1.0.0")
-        self.assertEqual(
-            parsed_requirements[0].extra_index_url, "https://pypi.org/simple"
-        )
-        self.assertEqual(parsed_requirements[1].package_name, "package2")
-        self.assertEqual(parsed_requirements[1].enum_operator, ">=")
-        self.assertEqual(parsed_requirements[1].semversion, "1.0.0")
-        self.assertEqual(
-            parsed_requirements[1].extra_index_url, "https://test.pypi.org/simple"
-        )
+        self.assertEqual(len(reqs), 2)
+        self.assertEqual(reqs[0].package_name, "package1")
+        self.assertEqual(reqs[0].enum_operator, "==")
+        self.assertEqual(reqs[0].semversion, "1.0.0")
+        self.assertEqual(reqs[0].extra_index_url, "https://pypi.org/simple")
+        self.assertEqual(reqs[1].package_name, "package2")
+        self.assertEqual(reqs[1].enum_operator, ">=")
+        self.assertEqual(reqs[1].semversion, "1.0.0")
+        self.assertEqual(reqs[1].extra_index_url, "https://test.pypi.org/simple")
 
     def test_extra_index_url_absence(self) -> None:
         """Tests absence of extra index url."""
-        requirements = Requirements(
+        reqs = Requirements(
             [
                 "package1==1.0.0 --extra-index-url https://pypi.org/simple",
                 "package2>=1.0.0",
             ]
         )
-        parsed_requirements = requirements.parse()
 
-        self.assertEqual(len(parsed_requirements), 2)
-        self.assertEqual(parsed_requirements[0].package_name, "package1")
-        self.assertEqual(parsed_requirements[0].enum_operator, "==")
-        self.assertEqual(parsed_requirements[0].semversion, "1.0.0")
-        self.assertEqual(
-            parsed_requirements[0].extra_index_url, "https://pypi.org/simple"
-        )
-        self.assertEqual(parsed_requirements[1].package_name, "package2")
-        self.assertEqual(parsed_requirements[1].enum_operator, ">=")
-        self.assertEqual(parsed_requirements[1].semversion, "1.0.0")
-        self.assertIsNone(parsed_requirements[1].extra_index_url)
+        self.assertEqual(len(reqs), 2)
+        self.assertEqual(reqs[0].package_name, "package1")
+        self.assertEqual(reqs[0].enum_operator, "==")
+        self.assertEqual(reqs[0].semversion, "1.0.0")
+        self.assertEqual(reqs[0].extra_index_url, "https://pypi.org/simple")
+        self.assertEqual(reqs[1].package_name, "package2")
+        self.assertEqual(reqs[1].enum_operator, ">=")
+        self.assertEqual(reqs[1].semversion, "1.0.0")
+        self.assertIsNone(reqs[1].extra_index_url)
 
     def test_has(self) -> None:
         """Tests absence of extra index url."""
@@ -112,8 +98,7 @@ class RequirementsTesting(unittest.TestCase):
             "package1==1.0.0 --extra-index-url https://pypi.org/simple",
             "package2>=1.0.0",
         ]
-        requirements = Requirements(deps)
-        reqs = requirements.parse()
+        reqs = Requirements(deps)
         self.assertIn("package1==1.0.0 --extra-index-url https://pypi.org/simple", reqs)
         self.assertIn("package2>=1.0.0", reqs)
         self.assertIn(deps, reqs)
