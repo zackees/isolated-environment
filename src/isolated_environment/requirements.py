@@ -39,9 +39,12 @@ class Req:
 
     @staticmethod
     def parse(requirement: str) -> "Req":
-        # Split the requirement string into package name and version
+        # Split the requirement string into package name, version and extra_index_url
         operator = None
         semversion = None
+        extra_index_url = None
+        if "--extra-index-url" in requirement:
+            requirement, extra_index_url = requirement.split("--extra-index-url")
         for op in Operator:
             if op.value in requirement:
                 package_name, version = requirement.split(op.value)
@@ -51,7 +54,7 @@ class Req:
         else:
             package_name = requirement
         # Return a new ParsedRequirement instance
-        return Req(package_name, operator, semversion)
+        return Req(package_name, operator, semversion, extra_index_url)
 
     def compare(self, other_package_name: str, other_semversion: semver.VersionInfo, other_extra_index_url: str | None = None):
         if self.package_name != other_package_name or self.extra_index_url != other_extra_index_url:
