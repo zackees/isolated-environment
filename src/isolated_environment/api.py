@@ -50,6 +50,12 @@ def _get_activated_environment(env_path: Path) -> dict[str, str]:
         out_env["PATH"] = str(env_path / "Scripts") + ";" + out_env["PATH"]
     else:
         out_env["PATH"] = str(env_path / "bin") + ":" + out_env["PATH"]
+
+    # set PYTHONPATH to make sure Python finds installed packages
+    if sys.platform == "win32":
+        out_env["PYTHONPATH"] = str(env_path / "Lib" / "site-packages")
+    else:
+        out_env["PYTHONPATH"] = str(env_path / "lib" / "site-packages")
     return out_env
 
 
@@ -155,11 +161,12 @@ class IsolatedEnvironment:
         """Gets the activated environment, which should be applied to subprocess environments."""
         return _get_activated_environment(self.env_path)
 
-    def run(self, cmd_list: list[str]) -> int:
+    def run(self, cmd_list: list[str]) -> subprocess.CompletedProcess:
         """Runs a command in the environment."""
         env = self.environment()
         cmd = subprocess.list2cmdline(cmd_list)
-        return subprocess.run(cmd, env=env, shell=True, check=True).returncode
+        cp = subprocess.run(cmd, env=env, shell=True, check=True)
+        return cp
 
     def pip_list(self) -> dict[str, Any]:
         """Returns a dictionary of installed packages."""
@@ -209,7 +216,8 @@ class IsolatedEnvironment:
             list_reqs = list(reqs)
             for req in list_reqs:
                 if req not in prev_reqs:
-                    self.pip_install(req)
+                    package_str = str(req)
+                    self.pip_install(package_str)
             self._write_reqs(reqs)
             return self.environment()
 

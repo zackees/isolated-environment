@@ -151,6 +151,7 @@ none of this supplemental license applies to you.
 
 # Releases
 
+  * 1.2.1 - Fixes `isolated_environment()` not installing deps correctly on first go
   * 1.2.0 - Now just use `isolated_environment()`, more simple.
   * 1.0.6 - `exists` -> `installed()`, adds `pip_list()`, adds `clean()`
   * 1.0.5 - Added `exists()`

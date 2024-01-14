@@ -85,6 +85,17 @@ class ParsedReq:
         extra_index_url_matches = comp(self.extra_index_url, other_extra_index_url)
         return True, semversion_matches, extra_index_url_matches
 
+    def __str__(self) -> str:
+        out = []
+        out.append(self.package_name)
+        if self.enum_operator is not None:
+            out.append(str(self.enum_operator))
+        if self.semversion is not None:
+            out.append(str(self.semversion))
+        if self.extra_index_url is not None:
+            out.append(f"--extra-index-url {self.extra_index_url}")
+        return " ".join(out)
+
 
 @dataclass
 class ParsedReqs:
@@ -100,10 +111,12 @@ class ParsedReqs:
         )
 
     def _has_pckg_req(self, req: ParsedReq) -> bool:
-        return all(
-            r.compare(req.package_name, req.semversion, req.extra_index_url)
-            for r in self.reqs
-        )
+        for r in self.reqs:
+            matches = r.compare(req.package_name, req.semversion, req.extra_index_url)
+            if matches[0]:
+                return all(matches)
+            return False
+        return False
 
     def has(self, other: Union["ParsedReqs", ParsedReq, str, List[str]]) -> bool:
         if isinstance(other, str):
