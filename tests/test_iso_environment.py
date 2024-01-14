@@ -22,17 +22,22 @@ def pretty(data: Any) -> str:
     return json.dumps(data, indent=4, sort_keys=True)
 
 
+def get_deps() -> list[str]:
+    """Gets the dependencies."""
+    out: list[str] = ["static_ffmpeg"]
+    if sys.platform != "darwin":
+        out.append(
+            "torch==2.1.2+cu121 --extra-index-url https://download.pytorch.org/whl/cu121"
+        )
+    return out
+
+
 class IsolatedEnvironmentTest(unittest.TestCase):
     """Main tester class."""
 
     def test_ensure_installed(self) -> None:
         """Tests that ensure_installed works."""
-        reqs = Requirements(
-            [
-                "torch==2.1.2+cu121 --extra-index-url https://download.pytorch.org/whl/cu121",
-                "static_ffmpeg",
-            ]
-        )
+        reqs = Requirements(get_deps())
         with TemporaryDirectory() as tmp_dir:
             iso_env = IsolatedEnvironment(Path(tmp_dir) / "venv")
             env = iso_env.ensure_installed(reqs)
