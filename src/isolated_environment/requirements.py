@@ -35,6 +35,7 @@ class Req:
     package_name: str
     enum_operator: Operator | None = None
     semversion: semver.VersionInfo | None = None
+    extra_index_url: str | None = None
 
     @staticmethod
     def parse(requirement: str) -> "Req":
@@ -52,8 +53,8 @@ class Req:
         # Return a new ParsedRequirement instance
         return Req(package_name, operator, semversion)
 
-    def compare(self, other_package_name: str, other_semversion: semver.VersionInfo):
-        if self.package_name != other_package_name:
+    def compare(self, other_package_name: str, other_semversion: semver.VersionInfo, other_extra_index_url: str | None = None):
+        if self.package_name != other_package_name or self.extra_index_url != other_extra_index_url:
             return False, False
 
         version_matched = False
