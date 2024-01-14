@@ -105,9 +105,11 @@ class ParsedReqs:
             for r in self.reqs
         )
 
-    def has(self, other: Union["ParsedReqs", str, List[str]]) -> bool:
+    def has(self, other: Union["ParsedReqs", ParsedReq, str, List[str]]) -> bool:
         if isinstance(other, str):
             return self._has_pckg_str(other)
+        if isinstance(other, ParsedReq):
+            return self._has_pckg_req(other)
         if isinstance(other, list):
             return all(self._has_pckg_str(line) for line in other)
         for req in other.reqs:
@@ -136,7 +138,7 @@ class Requirements:
         self._packages = packages
         self._parsed = self._parse()
 
-    def has(self, other: Union["Requirements", str, List[str]]) -> bool:
+    def has(self, other: Union["Requirements", ParsedReq, str, List[str]]) -> bool:
         if isinstance(other, Requirements):
             return self._parsed.has(other._parsed)  # pylint: disable=protected-access
         return self._parsed.has(other)
@@ -153,7 +155,9 @@ class Requirements:
         reqs = [ParsedReq.parse(package) for package in self._packages]
         return ParsedReqs(reqs)
 
-    def __contains__(self, other: Union["Requirements", str, List[str]]) -> bool:
+    def __contains__(
+        self, other: Union["Requirements", ParsedReq, str, List[str]]
+    ) -> bool:
         return self.has(other)
 
     def __len__(self) -> int:
@@ -175,6 +179,11 @@ class Requirements:
 
     def __repr__(self) -> str:
         return self.to_json()
+
+    def __eq__(self, __value: object) -> bool:
+        if isinstance(__value, Requirements):
+            return self._packages == __value._packages
+        return NotImplemented
 
     @staticmethod
     def from_json(json_str: str) -> "Requirements":

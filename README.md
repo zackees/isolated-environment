@@ -44,14 +44,8 @@ CUDA_VERSION = "cu121"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
-from isolated_environment import IsolatedEnvironment
-
-iso_env = IsolatedEnvironment(Path(HERE) / "ffmpeg-venv")
-with iso_env.lock():
-    if not iso_env.installed():
-        iso_env.install_environment()
-        iso_env.pip_install("static-ffmpeg")
-env = iso_env.environment()
+from isolated_environment import isolated_environment
+env = isolated_environment(Path(HERE) / "ffmpeg-venv", ["static-ffmpeg"])
 subprocess.check_output(["static_ffmpeg", "--help"], env=env, shell=True)
 ```
 

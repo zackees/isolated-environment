@@ -18,7 +18,7 @@ from typing import Any, Iterator
 
 from filelock import FileLock
 
-from .requirements import Requirements
+from isolated_environment.requirements import Requirements
 
 WARN_OPERATOR = [  # _todo: implement operator support
     "==",
@@ -76,13 +76,16 @@ def _package_name(package: str) -> str:
 class IsolatedEnvironment:
     """An isolated environment."""
 
-    def __init__(self, env_path: Path, verbose: bool = False) -> None:
+    def __init__(
+        self, env_path: Path, requirements: Requirements | None = None
+    ) -> None:
         self.env_path = env_path
         self.env_path.mkdir(parents=True, exist_ok=True)
-        self.verbose = verbose
         # file_lock is side-by-side with the environment.
         self.file_lock = FileLock(str(env_path) + ".lock")
         self.packages_json = env_path / "packages.json"
+        if requirements is not None:
+            self.ensure_installed(requirements)
 
     def install_environment(self) -> None:
         """Installs the environment."""
@@ -156,8 +159,6 @@ class IsolatedEnvironment:
         """Runs a command in the environment."""
         env = self.environment()
         cmd = subprocess.list2cmdline(cmd_list)
-        if self.verbose:
-            print(f"Running: {cmd}")
         return subprocess.run(cmd, env=env, shell=True, check=True).returncode
 
     def pip_list(self) -> dict[str, Any]:
@@ -195,3 +196,23 @@ class IsolatedEnvironment:
             if package_name not in pip_list_names:
                 return False
         return True
+
+    # Returns an environment dictionary
+    def ensure_installed(self, reqs: Requirements) -> dict[str, Any]:
+        """Ensures that the packages are installed."""
+        with self.lock():
+            if not self.installed():
+                self.install_environment()
+            prev_reqs = self._read_reqs()
+            if reqs == prev_reqs:
+                return self.environment()
+            list_reqs = list(reqs)
+            for req in list_reqs:
+                if req not in prev_reqs:
+                    self.pip_install(req)
+            self._write_reqs(reqs)
+            return self.environment()
+
+    def installed_requirements(self) -> Requirements:
+        """Returns a list of installed requirements."""
+        return self._read_reqs()
