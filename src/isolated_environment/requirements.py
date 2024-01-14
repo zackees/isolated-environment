@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Iterator, List, Tuple, Union
@@ -131,6 +132,7 @@ class Requirements:
     """Requirements"""
 
     def __init__(self, packages: list[str]) -> None:
+        assert isinstance(packages, list)
         self._packages = packages
         self._parsed = self._parse()
 
@@ -138,6 +140,13 @@ class Requirements:
         if isinstance(other, Requirements):
             return self._parsed.has(other._parsed)  # pylint: disable=protected-access
         return self._parsed.has(other)
+
+    def add(self, other: Union[str, List[str]]) -> None:
+        if isinstance(other, str):
+            self._packages.append(other)
+        elif isinstance(other, list):
+            self._packages.extend(other)
+        self._parsed = self._parse()
 
     def _parse(self) -> ParsedReqs:
         """Parses the requirements"""
@@ -155,3 +164,19 @@ class Requirements:
 
     def __iter__(self) -> Iterator[Any]:
         return iter(self._parsed)
+
+    def to_json(self) -> str:
+        """Returns a JSON representation of the requirements."""
+        out = json.dumps(self._packages, indent=4, sort_keys=True)
+        return out
+
+    def __str__(self) -> str:
+        return self.to_json()
+
+    def __repr__(self) -> str:
+        return self.to_json()
+
+    @staticmethod
+    def from_json(json_str: str) -> "Requirements":
+        """Returns a Requirements instance from a JSON string."""
+        return Requirements(json.loads(json_str))

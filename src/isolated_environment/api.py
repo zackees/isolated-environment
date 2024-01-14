@@ -18,6 +18,8 @@ from typing import Any, Iterator
 
 from filelock import FileLock
 
+from .requirements import Requirements
+
 WARN_OPERATOR = [  # _todo: implement operator support
     "==",
     ">=",
@@ -80,10 +82,17 @@ class IsolatedEnvironment:
         self.verbose = verbose
         # file_lock is side-by-side with the environment.
         self.file_lock = FileLock(str(env_path) + ".lock")
+        self.packages_json = env_path / "packages.json"
 
     def install_environment(self) -> None:
         """Installs the environment."""
+        assert (
+            not self.installed()
+        ), f"The environment {self.env_path} is already installed."
         self.env_path = _create_virtual_env(self.env_path)
+        # write the packages.json file
+        empty_reqs = Requirements([])
+        self._write_reqs(empty_reqs)
 
     def installed(self) -> bool:
         """Returns True if the environment is installed."""
@@ -97,6 +106,19 @@ class IsolatedEnvironment:
         """Cleans the environment."""
         if self.env_path.exists():
             shutil.rmtree(self.env_path, ignore_errors=True)
+
+    def _read_reqs(self) -> Requirements:
+        """Reads the packages.json file."""
+        if not self.packages_json.exists():
+            return Requirements([])
+        out = self.packages_json.read_text()
+        data = Requirements.from_json(out)
+        return data
+
+    def _write_reqs(self, reqs: Requirements) -> None:
+        """Writes the packages.json file."""
+        out = reqs.to_json()
+        self.packages_json.write_text(out)
 
     @contextmanager
     def lock(self) -> Iterator[None]:
@@ -114,11 +136,17 @@ class IsolatedEnvironment:
         assert (
             self.env_path.exists()
         ), f"The environment {self.env_path} doesn't exist, install it first."
+        reqs = self._read_reqs()
         if isinstance(package, list):
             for p in package:
-                self.pip_install(p, extra_index)
+                _pip_install(self.env_path, p, extra_index)
+                reqs.add(package)
         elif isinstance(package, str):
             _pip_install(self.env_path, package, extra_index)
+            reqs.add(package)
+        else:
+            raise TypeError(f"Unknown type for package: {type(package)}")
+        self._write_reqs(reqs)
 
     def environment(self) -> dict[str, str]:
         """Gets the activated environment, which should be applied to subprocess environments."""
