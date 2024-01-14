@@ -49,9 +49,7 @@ class RequirementsTesting(unittest.TestCase):
 
     def test_package_with_greater_less_equal_operators(self) -> None:
         """Tests package with greater than or equal to, and less than or equal to operators."""
-        requirements = Requirements(
-            ["package1>=1.0.0", "package2<=2.0.0"]
-        )
+        requirements = Requirements(["package1>=1.0.0", "package2<=2.0.0"])
         parsed_requirements = requirements.parse()
 
         self.assertEqual(len(parsed_requirements), 2)
@@ -61,6 +59,64 @@ class RequirementsTesting(unittest.TestCase):
         self.assertEqual(parsed_requirements[1].package_name, "package2")
         self.assertEqual(parsed_requirements[1].enum_operator, "<=")
         self.assertEqual(parsed_requirements[1].semversion, "2.0.0")
+
+    def test_extra_index_url_mismatch(self) -> None:
+        """Tests extra index url mismatch."""
+        requirements = Requirements(
+            [
+                "package1==1.0.0 --extra-index-url https://pypi.org/simple",
+                "package2>=1.0.0 --extra-index-url https://test.pypi.org/simple",
+            ]
+        )
+        parsed_requirements = requirements.parse()
+
+        self.assertEqual(len(parsed_requirements), 2)
+        self.assertEqual(parsed_requirements[0].package_name, "package1")
+        self.assertEqual(parsed_requirements[0].enum_operator, "==")
+        self.assertEqual(parsed_requirements[0].semversion, "1.0.0")
+        self.assertEqual(
+            parsed_requirements[0].extra_index_url, "https://pypi.org/simple"
+        )
+        self.assertEqual(parsed_requirements[1].package_name, "package2")
+        self.assertEqual(parsed_requirements[1].enum_operator, ">=")
+        self.assertEqual(parsed_requirements[1].semversion, "1.0.0")
+        self.assertEqual(
+            parsed_requirements[1].extra_index_url, "https://test.pypi.org/simple"
+        )
+
+    def test_extra_index_url_absence(self) -> None:
+        """Tests absence of extra index url."""
+        requirements = Requirements(
+            [
+                "package1==1.0.0 --extra-index-url https://pypi.org/simple",
+                "package2>=1.0.0",
+            ]
+        )
+        parsed_requirements = requirements.parse()
+
+        self.assertEqual(len(parsed_requirements), 2)
+        self.assertEqual(parsed_requirements[0].package_name, "package1")
+        self.assertEqual(parsed_requirements[0].enum_operator, "==")
+        self.assertEqual(parsed_requirements[0].semversion, "1.0.0")
+        self.assertEqual(
+            parsed_requirements[0].extra_index_url, "https://pypi.org/simple"
+        )
+        self.assertEqual(parsed_requirements[1].package_name, "package2")
+        self.assertEqual(parsed_requirements[1].enum_operator, ">=")
+        self.assertEqual(parsed_requirements[1].semversion, "1.0.0")
+        self.assertIsNone(parsed_requirements[1].extra_index_url)
+
+    def test_has(self) -> None:
+        """Tests absence of extra index url."""
+        deps = [
+            "package1==1.0.0 --extra-index-url https://pypi.org/simple",
+            "package2>=1.0.0",
+        ]
+        requirements = Requirements(deps)
+        reqs = requirements.parse()
+        self.assertIn("package1==1.0.0 --extra-index-url https://pypi.org/simple", reqs)
+        self.assertIn("package2>=1.0.0", reqs)
+        self.assertIn(deps, reqs)
 
 
 if __name__ == "__main__":

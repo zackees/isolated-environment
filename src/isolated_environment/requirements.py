@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Iterator, List, Tuple, Union
 
 import semver
 
@@ -28,6 +29,15 @@ class Operator(Enum):
         return NotImplemented
 
 
+def comp(a: Any, b: Any) -> bool:
+    """Compares two objects."""
+    if a is None and b is None:
+        return True
+    if a is None or b is None:
+        return False
+    return a == b
+
+
 @dataclass
 class Req:
     """Parsed requirement"""
@@ -45,6 +55,10 @@ class Req:
         extra_index_url = None
         if "--extra-index-url" in requirement:
             requirement, extra_index_url = requirement.split("--extra-index-url")
+        # strip
+        requirement = requirement.strip()
+        if extra_index_url is not None:
+            extra_index_url = extra_index_url.strip()
         for op in Operator:
             if op.value in requirement:
                 package_name, version = requirement.split(op.value)
@@ -56,43 +70,70 @@ class Req:
         # Return a new ParsedRequirement instance
         return Req(package_name, operator, semversion, extra_index_url)
 
-    def compare(self, other_package_name: str, other_semversion: semver.VersionInfo, other_extra_index_url: str | None = None):
-        if self.package_name != other_package_name or self.extra_index_url != other_extra_index_url:
-            return False, False
+    def compare(
+        self,
+        other_package_name: str,
+        other_semversion: semver.VersionInfo | None = None,
+        other_extra_index_url: str | None = None,
+    ) -> Tuple[bool, bool, bool]:
+        """Compares the parsed requirement with another parsed requirement"""
+        package_name_matches = comp(self.package_name, other_package_name)
+        if not package_name_matches:
+            return False, False, False
+        semversion_matches = comp(self.semversion, other_semversion)
+        extra_index_url_matches = comp(self.extra_index_url, other_extra_index_url)
+        return True, semversion_matches, extra_index_url_matches
 
-        version_matched = False
 
-        if self.enum_operator is None or self.semversion is None:
-            # Handle the case where operator or semversion is None
-            return True, version_matched
+@dataclass
+class Reqs:
+    """Parsed requirements"""
 
-        if self.enum_operator == Operator.EQ:
-            version_matched = self.semversion == other_semversion
-        elif self.enum_operator == Operator.GE:
-            version_matched = self.semversion >= other_semversion
-        elif self.enum_operator == Operator.LE:
-            version_matched = self.semversion <= other_semversion
-        elif self.enum_operator == Operator.GT:
-            version_matched = self.semversion > other_semversion
-        elif self.enum_operator == Operator.LT:
-            version_matched = self.semversion < other_semversion
-        elif self.enum_operator == Operator.NE:
-            version_matched = self.semversion != other_semversion
-        elif self.enum_operator == Operator.APPROX:
-            if self.semversion is not None and other_semversion is not None:
-                version_matched = (
-                    self.semversion.major == other_semversion.major
-                    and self.semversion.minor == other_semversion.minor
-                )
+    reqs: List[Req]
 
-        return True, version_matched
+    def _has_pckg_str(self, line: str) -> bool:
+        req = Req.parse(line)
+        return all(
+            r.compare(req.package_name, req.semversion, req.extra_index_url)
+            for r in self.reqs
+        )
+
+    def _has_pckg_req(self, req: Req) -> bool:
+        return all(
+            r.compare(req.package_name, req.semversion, req.extra_index_url)
+            for r in self.reqs
+        )
+
+    def has(self, other: Union["Reqs", str, List[str]]) -> bool:
+        if isinstance(other, str):
+            return self._has_pckg_str(other)
+        if isinstance(other, list):
+            return all(self._has_pckg_str(line) for line in other)
+        for req in other.reqs:
+            if not self._has_pckg_req(req):
+                return False
+        return True
+
+    def __contains__(self, other: Union["Reqs", str, List[str]]) -> bool:
+        return self.has(other)
+
+    def __len__(self) -> int:
+        return len(self.reqs)
+
+    def __getitem__(self, index: int) -> Req:
+        return self.reqs[index]
+
+    def __iter__(self) -> Iterator[Any]:
+        return iter(self.reqs)
 
 
 @dataclass
 class Requirements:
     """Requirements"""
 
-    packages: list[str]
+    packages: List[str]
 
-    def parse(self) -> list[Req]:
-        return [Req.parse(package) for package in self.packages]
+    def parse(self) -> Reqs:
+        """Parses the requirements"""
+        reqs = [Req.parse(package) for package in self.packages]
+        return Reqs(reqs)
