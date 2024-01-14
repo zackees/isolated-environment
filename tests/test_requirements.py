@@ -47,6 +47,21 @@ class RequirementsTesting(unittest.TestCase):
         self.assertEqual(parsed_requirements[2].enum_operator, "!=")
         self.assertEqual(parsed_requirements[2].semversion, "3.0.0")
 
+    def test_package_with_greater_less_equal_operators(self) -> None:
+        """Tests package with greater than or equal to, and less than or equal to operators."""
+        requirements = Requirements(
+            ["package1>=1.0.0", "package2<=2.0.0"]
+        )
+        parsed_requirements = requirements.parse()
+
+        self.assertEqual(len(parsed_requirements), 2)
+        self.assertEqual(parsed_requirements[0].package_name, "package1")
+        self.assertEqual(parsed_requirements[0].enum_operator, ">=")
+        self.assertEqual(parsed_requirements[0].semversion, "1.0.0")
+        self.assertEqual(parsed_requirements[1].package_name, "package2")
+        self.assertEqual(parsed_requirements[1].enum_operator, "<=")
+        self.assertEqual(parsed_requirements[1].semversion, "2.0.0")
+
 
 if __name__ == "__main__":
     unittest.main()
