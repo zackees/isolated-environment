@@ -40,12 +40,43 @@ def comp(a: Any, b: Any) -> bool:
 
 
 @dataclass
+class VersionBuild:
+    """Designed to handle version strings in pip, which can be like 2.1.2+build1"""
+
+    semversion: semver.VersionInfo
+    build: str | None = None
+
+    @staticmethod
+    def parse(version: str) -> "VersionBuild":
+        """Parses a version string."""
+        if "+" in version:
+            semversion, build = version.split("+")
+        else:
+            semversion = version
+            build = None
+        return VersionBuild(semver.VersionInfo.parse(semversion), build)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, VersionBuild):
+            return self.semversion == other.semversion and self.build == other.build
+        if isinstance(other, str):
+            return str(self) == other
+        return NotImplemented
+
+    def __str__(self) -> str:
+        out = str(self.semversion)
+        if self.build is not None:
+            out += f"+{self.build}"
+        return out
+
+
+@dataclass
 class ParsedReq:
     """Parsed requirement"""
 
     package_name: str
     enum_operator: Operator | None = None
-    semversion: semver.VersionInfo | None = None
+    semversion: VersionBuild | None = None
     extra_index_url: str | None = None
 
     @staticmethod
@@ -64,7 +95,7 @@ class ParsedReq:
             if op.value in requirement:
                 package_name, version = requirement.split(op.value)
                 operator = op
-                semversion = semver.VersionInfo.parse(version)
+                semversion = VersionBuild.parse(version)
                 break
         else:
             package_name = requirement
@@ -74,7 +105,7 @@ class ParsedReq:
     def compare(
         self,
         other_package_name: str,
-        other_semversion: semver.VersionInfo | None = None,
+        other_semversion: VersionBuild | None = None,
         other_extra_index_url: str | None = None,
     ) -> Tuple[bool, bool, bool]:
         """Compares the parsed requirement with another parsed requirement"""
@@ -95,6 +126,17 @@ class ParsedReq:
             out += f" --extra-index-url {self.extra_index_url}"
         return out
 
+    def get_package_str(self) -> str:
+        out = self.package_name
+        if self.enum_operator is not None:
+            # out.append(str(self.enum_operator))
+            out += str(self.enum_operator)
+            out += str(self.semversion)
+        return out
+
+    def get_extra_index_url(self) -> str | None:
+        return self.extra_index_url
+
 
 @dataclass
 class ParsedReqs:
@@ -104,10 +146,12 @@ class ParsedReqs:
 
     def _has_pckg_str(self, line: str) -> bool:
         req = ParsedReq.parse(line)
-        return all(
-            r.compare(req.package_name, req.semversion, req.extra_index_url)
-            for r in self.reqs
-        )
+        for r in self.reqs:
+            matches = r.compare(req.package_name, req.semversion, req.extra_index_url)
+            if matches[0]:
+                return all(matches)
+            return False
+        return False
 
     def _has_pckg_req(self, req: ParsedReq) -> bool:
         for r in self.reqs:

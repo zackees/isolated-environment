@@ -216,8 +216,9 @@ class IsolatedEnvironment:
             list_reqs = list(reqs)
             for req in list_reqs:
                 if req not in prev_reqs:
-                    package_str = str(req)
-                    self.pip_install(package_str)
+                    package_str = req.get_package_str()
+                    extra_index = req.get_extra_index_url()
+                    self.pip_install(package=package_str, extra_index=extra_index)
             self._write_reqs(reqs)
             return self.environment()
 

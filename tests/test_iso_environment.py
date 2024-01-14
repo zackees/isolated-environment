@@ -4,11 +4,11 @@ Unit test file.
 
 import json
 import subprocess
+import sys
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
-import sys
 
 from isolated_environment.api import IsolatedEnvironment
 from isolated_environment.requirements import Requirements
@@ -29,7 +29,8 @@ class IsolatedEnvironmentTest(unittest.TestCase):
         """Tests that ensure_installed works."""
         reqs = Requirements(
             [
-                "static-ffmpeg",
+                "torch==2.1.2+cu121 --extra-index-url https://download.pytorch.org/whl/cu121",
+                "static_ffmpeg",
             ]
         )
         with TemporaryDirectory() as tmp_dir:
@@ -39,7 +40,9 @@ class IsolatedEnvironmentTest(unittest.TestCase):
             installed_reqs = iso_env.installed_requirements()
             self.assertEqual(installed_reqs, reqs)
             try:
-                subprocess.check_output(["static_ffmpeg", "--help"], env=env, shell=True)
+                subprocess.check_output(
+                    ["static_ffmpeg", "--help"], env=env, shell=True
+                )
             except subprocess.CalledProcessError as exc:
                 # doesn't fail on Windows, but it does on other platforms
                 if sys.platform == "win32":
