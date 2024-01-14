@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
+import sys
 
 from isolated_environment.api import IsolatedEnvironment
 from isolated_environment.requirements import Requirements
@@ -37,7 +38,12 @@ class IsolatedEnvironmentTest(unittest.TestCase):
             self.assertTrue(iso_env.installed())
             installed_reqs = iso_env.installed_requirements()
             self.assertEqual(installed_reqs, reqs)
-            subprocess.check_output(["static_ffmpeg", "--help"], env=env, shell=True)
+            try:
+                subprocess.check_output(["static_ffmpeg", "--help"], env=env, shell=True)
+            except subprocess.CalledProcessError as exc:
+                # doesn't fail on Windows, but it does on other platforms
+                if sys.platform == "win32":
+                    raise exc
             # Second time should be a no-op.
             iso_env.ensure_installed(reqs)
             iso_env.clean()

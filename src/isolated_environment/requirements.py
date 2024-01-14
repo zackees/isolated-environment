@@ -86,15 +86,14 @@ class ParsedReq:
         return True, semversion_matches, extra_index_url_matches
 
     def __str__(self) -> str:
-        out = []
-        out.append(self.package_name)
+        out = self.package_name
         if self.enum_operator is not None:
-            out.append(str(self.enum_operator))
-        if self.semversion is not None:
-            out.append(str(self.semversion))
+            # out.append(str(self.enum_operator))
+            out += str(self.enum_operator)
+            out += str(self.semversion)
         if self.extra_index_url is not None:
-            out.append(f"--extra-index-url {self.extra_index_url}")
-        return " ".join(out)
+            out += f" --extra-index-url {self.extra_index_url}"
+        return out
 
 
 @dataclass
