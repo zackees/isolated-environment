@@ -150,7 +150,6 @@ class ParsedReqs:
             matches = r.compare(req.package_name, req.semversion, req.extra_index_url)
             if matches[0]:
                 return all(matches)
-            return False
         return False
 
     def _has_pckg_req(self, req: ParsedReq) -> bool:
@@ -158,7 +157,6 @@ class ParsedReqs:
             matches = r.compare(req.package_name, req.semversion, req.extra_index_url)
             if matches[0]:
                 return all(matches)
-            return False
         return False
 
     def has(self, other: Union["ParsedReqs", ParsedReq, str, List[str]]) -> bool:
