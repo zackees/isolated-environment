@@ -19,6 +19,16 @@ class RequirementsTesting(unittest.TestCase):
             self.assertIsNone(req.enum_operator)
             self.assertIsNone(req.semversion)
 
+    def test_single_package_with_version(self) -> None:
+        """Tests single package with version."""
+        requirements = Requirements(["package==1.0.0", "package2>=1.0.0"])
+        parsed_requirements = requirements.parse()
+
+        self.assertEqual(len(parsed_requirements), 2)
+        self.assertEqual(parsed_requirements[0].package_name, "package")
+        self.assertEqual(parsed_requirements[0].enum_operator, "==")
+        self.assertEqual(parsed_requirements[0].semversion, "1.0.0")
+
 
 if __name__ == "__main__":
     unittest.main()

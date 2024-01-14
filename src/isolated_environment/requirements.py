@@ -15,6 +15,18 @@ class Operator(Enum):
     NE = "!="
     APPROX = "~="
 
+    # str representation of the enum
+    def __str__(self) -> str:
+        return self.value
+
+    # equals operator
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Operator):
+            return self.value == other.value
+        if isinstance(other, str):
+            return self.value == other
+        return NotImplemented
+
 
 @dataclass
 class Req:
