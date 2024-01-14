@@ -151,6 +151,7 @@ none of this supplemental license applies to you.
 
 # Releases
 
+  * 1.2.3 - All builds green with complex dependencies!
   * 1.2.2 - Tested and fixed complex semversion + build number for isolated_environment
   * 1.2.1 - Fixes `isolated_environment()` not installing deps correctly on first go
   * 1.2.0 - Now just use `isolated_environment()`, more simple.
