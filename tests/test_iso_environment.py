@@ -24,7 +24,7 @@ def pretty(data: Any) -> str:
 
 def get_deps() -> list[str]:
     """Gets the dependencies."""
-    out: list[str] = ["static_ffmpeg"]
+    out: list[str] = ["static_ffmpeg --use-pep517"]
     if sys.platform != "darwin":
         out.append(
             "torch==2.1.2+cu121 --extra-index-url https://download.pytorch.org/whl/cu121"

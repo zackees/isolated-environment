@@ -59,13 +59,15 @@ def _get_activated_environment(env_path: Path) -> dict[str, str]:
     return out_env
 
 
-def _pip_install(env_path: Path, package: str, extra_index: str | None = None) -> None:
+def _pip_install(
+    env_path: Path, package: str, build_options: str | None = None
+) -> None:
     """Installs a package in the virtual environment."""
     # Activate the environment and install packages
     env = _get_activated_environment(env_path)
     cmd_list = ["pip", "install", package]
-    if extra_index:
-        cmd_list.extend(["--extra-index-url", extra_index])
+    if build_options:
+        cmd_list.extend(build_options.split(" "))
     cmd = subprocess.list2cmdline(cmd_list)
     print(f"Running: {cmd}")
     subprocess.run(cmd, env=env, shell=True, check=True)
@@ -139,7 +141,7 @@ class IsolatedEnvironment:
             self.file_lock.release()
 
     def pip_install(
-        self, package: str | list[str], extra_index: str | None = None
+        self, package: str | list[str], build_options: str | None = None
     ) -> None:
         """Installs a package in the virtual environment."""
         assert (
@@ -148,10 +150,10 @@ class IsolatedEnvironment:
         reqs = self._read_reqs()
         if isinstance(package, list):
             for p in package:
-                _pip_install(self.env_path, p, extra_index)
+                _pip_install(self.env_path, p, build_options)
                 reqs.add(package)
         elif isinstance(package, str):
-            _pip_install(self.env_path, package, extra_index)
+            _pip_install(self.env_path, package, build_options)
             reqs.add(package)
         else:
             raise TypeError(f"Unknown type for package: {type(package)}")
@@ -217,8 +219,8 @@ class IsolatedEnvironment:
             for req in list_reqs:
                 if req not in prev_reqs:
                     package_str = req.get_package_str()
-                    extra_index = req.get_extra_index_url()
-                    self.pip_install(package=package_str, extra_index=extra_index)
+                    build_options = req.build_options
+                    self.pip_install(package=package_str, build_options=build_options)
             self._write_reqs(reqs)
             return self.environment()
 
