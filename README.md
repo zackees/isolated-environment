@@ -45,8 +45,8 @@ EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 from isolated_environment import isolated_environment
-env = isolated_environment(Path(HERE) / "ffmpeg-venv", ["static-ffmpeg"])
-subprocess.check_output(["static_ffmpeg", "--help"], env=env, shell=True)
+env = isolated_environment(Path(HERE) / "whisper-venv", [f"openai-whisper --extra-index-url {EXTRA_INDEX_URL}"])
+subprocess.check_output(["whisper", "--help"], env=env, shell=True)
 ```
 
 # Why not just use `venv` directly?
