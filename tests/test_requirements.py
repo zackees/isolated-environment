@@ -67,11 +67,15 @@ class RequirementsTesting(unittest.TestCase):
         self.assertEqual(reqs[0].package_name, "package1")
         self.assertEqual(reqs[0].enum_operator, "==")
         self.assertEqual(reqs[0].semversion, "1.0.0")
-        self.assertEqual(reqs[0].build_options, "https://pypi.org/simple")
+        self.assertEqual(
+            reqs[0].build_options, "--extra-index-url https://pypi.org/simple"
+        )
         self.assertEqual(reqs[1].package_name, "package2")
         self.assertEqual(reqs[1].enum_operator, ">=")
         self.assertEqual(reqs[1].semversion, "1.0.0")
-        self.assertEqual(reqs[1].build_options, "https://test.pypi.org/simple")
+        self.assertEqual(
+            reqs[1].build_options, "--extra-index-url https://test.pypi.org/simple"
+        )
 
     def test_extra_index_url_absence(self) -> None:
         """Tests absence of extra index url."""
@@ -86,7 +90,9 @@ class RequirementsTesting(unittest.TestCase):
         self.assertEqual(reqs[0].package_name, "package1")
         self.assertEqual(reqs[0].enum_operator, "==")
         self.assertEqual(reqs[0].semversion, "1.0.0")
-        self.assertEqual(reqs[0].build_options, "https://pypi.org/simple")
+        self.assertEqual(
+            reqs[0].build_options, "--extra-index-url https://pypi.org/simple"
+        )
         self.assertEqual(reqs[1].package_name, "package2")
         self.assertEqual(reqs[1].enum_operator, ">=")
         self.assertEqual(reqs[1].semversion, "1.0.0")
