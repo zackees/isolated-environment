@@ -50,7 +50,7 @@ env = isolated_environment(Path(HERE) / "whisper-venv", [
     "whisper-whisper",
     f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}"
 ])
-subprocess.check_output(["static_ffmpeg", "--help"], env=env, shell=True)
+subprocess.check_output(["whisper", "--help"], env=env, shell=True)
 ```
 
 # Why not just use `venv` directly?
@@ -155,7 +155,7 @@ none of this supplemental license applies to you.
 
 # Releases
 
-  * 1.2.5 - Update readme
+  * 1.2.6 - Update readme
   * 1.2.4 - Now support more build options, instead of just --extra-index-url.
   * 1.2.3 - All builds green with complex dependencies!
   * 1.2.2 - Tested and fixed complex semversion + build number for isolated_environment
