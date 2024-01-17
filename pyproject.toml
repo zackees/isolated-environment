@@ -13,10 +13,11 @@ classifiers = ["Programming Language :: Python :: 3"]
 dependencies = [
     "wheel",
     "filelock",
-    "semver"
+    "semver",
+    "setuptools"
 ]
 # Change this with the version number bump.
-version = "1.2.4"
+version = "1.2.5"
 
 [tool.ruff]
 line-length = 200
