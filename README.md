@@ -162,6 +162,8 @@ none of this supplemental license applies to you.
 
 # Releases
 
+  * 1.3.1 - Update readme.
+  * 1.3.0 - Marks a new interface.
   * 1.2.7 - Please use `isolated_environment_run()` instead of `isolated_environment`. The latter has
             footguns when using Linux when invoking `python` and `shell=True`
   * 1.2.6 - Update readme
