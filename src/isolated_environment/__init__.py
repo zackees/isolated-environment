@@ -5,6 +5,7 @@ from typing import Any, Union
 from .api import IsolatedEnvironment  # noqa: F401
 from .requirements import Requirements  # noqa: F401
 
+
 # Note: be very careful when using shell=True and executing
 # the python interpreter.  On linux it will drop you into the
 # python interpreter and you will not be able to exit.
@@ -43,5 +44,6 @@ def isolated_environment_run(
     iso_env.ensure_installed(reqs)
     cp = iso_env.run(cmd_list, **kwargs)
     return cp
+
 
 isolated_environment_cmd = isolated_environment_run  # backwards compatibility

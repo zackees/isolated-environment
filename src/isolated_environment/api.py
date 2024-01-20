@@ -176,8 +176,9 @@ class IsolatedEnvironment:
         if "shell" in kwargs and kwargs["shell"]:
             if "python" in cmd_list[0]:
                 raise ValueError(
-                    f"shell=True and python in {cmd_list}, this will drop you into "+
-                    "the python interpreter in linux and you will not be able to exit.")
+                    f"shell=True and python in {cmd_list}, this will drop you into "
+                    + "the python interpreter in linux and you will not be able to exit."
+                )
 
         universal_newlines = kwargs.get("universal_newlines", True)
         if "universal_newlines" in kwargs:
@@ -193,7 +194,7 @@ class IsolatedEnvironment:
             text=text,
             capture_output=capture_output,
             universal_newlines=universal_newlines,
-            **kwargs
+            **kwargs,
         )
         return cp
 

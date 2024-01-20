@@ -17,7 +17,7 @@ RUN_PY = HERE / "run.py"
 class MainTester(unittest.TestCase):
     """Main tester class."""
 
-    @unittest.skip("DO NOT USE shell=True")
+    @unittest.skip("DO NOT USE shell=True for python!!!")
     def test_shell(self) -> None:
         """Test command line interface (CLI)."""
         with TemporaryDirectory() as tmp_dir:
@@ -51,9 +51,8 @@ class MainTester(unittest.TestCase):
         with TemporaryDirectory() as tmp_dir:
             venv_path = Path(tmp_dir) / "venv"
             cp = isolated_environment_run(
-                env_path=venv_path,
-                requirements=[],
-                cmd_list=["python", str(RUN_PY)])
+                env_path=venv_path, requirements=[], cmd_list=["python", str(RUN_PY)]
+            )
             self.assertEqual(0, cp.returncode)
             self.assertEqual("Hello World!\n", cp.stdout)
 

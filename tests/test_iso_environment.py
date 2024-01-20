@@ -33,7 +33,7 @@ def get_deps() -> list[str]:
 
 
 class IsolatedEnvironmentTest(unittest.TestCase):
-    """Main tester class.""" 
+    """Main tester class."""
 
     def test_ensure_installed(self) -> None:
         """Tests that ensure_installed works."""
