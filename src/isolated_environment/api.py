@@ -163,11 +163,38 @@ class IsolatedEnvironment:
         """Gets the activated environment, which should be applied to subprocess environments."""
         return _get_activated_environment(self.env_path)
 
-    def run(self, cmd_list: list[str]) -> subprocess.CompletedProcess:
+    def run(self, cmd_list: list[str], **kwargs) -> subprocess.CompletedProcess:
         """Runs a command in the environment."""
         env = self.environment()
-        cmd = subprocess.list2cmdline(cmd_list)
-        cp = subprocess.run(cmd, env=env, shell=True, check=True)
+        capture_output = kwargs.get("capture_output", True)
+        if "capture_output" in kwargs:
+            del kwargs["capture_output"]
+        check = kwargs.get("check", False)
+        if "check" in kwargs:
+            del kwargs["check"]
+        assert "shell" not in kwargs, "shell passed in, we only support shell=False."
+        if "shell" in kwargs and kwargs["shell"]:
+            if "python" in cmd_list[0]:
+                raise ValueError(
+                    f"shell=True and python in {cmd_list}, this will drop you into "+
+                    "the python interpreter in linux and you will not be able to exit.")
+
+        universal_newlines = kwargs.get("universal_newlines", True)
+        if "universal_newlines" in kwargs:
+            del kwargs["universal_newlines"]
+        text = kwargs.get("text", universal_newlines)
+        if "text" in kwargs:
+            del kwargs["text"]
+        cp = subprocess.run(
+            cmd_list,
+            env=env,
+            shell=False,
+            check=check,
+            text=text,
+            capture_output=capture_output,
+            universal_newlines=universal_newlines,
+            **kwargs
+        )
         return cp
 
     def pip_list(self) -> dict[str, Any]:

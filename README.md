@@ -39,18 +39,25 @@ dependency conflicts.
 ```python
 from pathlib import Path
 import subprocess
+from isolated_environment import isolated_environment_run
 
 TENSOR_VERSION = "2.1.2"
 CUDA_VERSION = "cu121"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
-
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
-from isolated_environment import isolated_environment
-env = isolated_environment(Path(HERE) / "whisper-venv", [
+
+venv_path = Path(HERE) / "whisper-venv"
+requirements = [
     "whisper-whisper",
     f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}"
-])
-subprocess.check_output(["whisper", "--help"], env=env, shell=True)
+]
+cmd_list = ["whisper", "--help"]
+# Note that shell=False, universal_newlines=True, capture=True
+cp: subprocess.CompletedProcess = isolated_environment_run(
+    env_path=venv_path,
+    requirements=requirements,
+    cmd_list=cmd_list)
+print(cp.stdout)
 ```
 
 # Why not just use `venv` directly?

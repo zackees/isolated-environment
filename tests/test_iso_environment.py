@@ -33,7 +33,7 @@ def get_deps() -> list[str]:
 
 
 class IsolatedEnvironmentTest(unittest.TestCase):
-    """Main tester class."""
+    """Main tester class.""" 
 
     def test_ensure_installed(self) -> None:
         """Tests that ensure_installed works."""
@@ -46,7 +46,7 @@ class IsolatedEnvironmentTest(unittest.TestCase):
             self.assertEqual(installed_reqs, reqs)
             try:
                 subprocess.check_output(
-                    ["static_ffmpeg", "--help"], env=env, shell=True
+                    ["static_ffmpeg", "--help"], env=env, shell=False
                 )
             except subprocess.CalledProcessError as exc:
                 # doesn't fail on Windows, but it does on other platforms
