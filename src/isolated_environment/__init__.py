@@ -31,7 +31,7 @@ def isolated_environment_run(
     """
     Creates an isolated environment. Note that by default:
       shell=False,
-      capture_output=True,
+      capture_output=False,
       universal_newlines=True,
       text=universal_newlines,
     If "python" is in cmd_list[0], then shell=True will cause a ValueError

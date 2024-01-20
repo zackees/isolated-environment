@@ -46,7 +46,8 @@ class IsolatedEnvironmentTest(unittest.TestCase):
             self.assertEqual(installed_reqs, reqs)
             try:
                 subprocess.check_output(
-                    ["static_ffmpeg", "--help"], env=env, shell=True
+                    ["static_ffmpeg", "--help"], env=env,
+                    shell=True  # shell=True is allowed only when NOT running python.
                 )
             except subprocess.CalledProcessError as exc:
                 # doesn't fail on Windows, but it does on other platforms

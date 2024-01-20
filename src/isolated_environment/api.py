@@ -166,7 +166,7 @@ class IsolatedEnvironment:
     def run(self, cmd_list: list[str], **kwargs) -> subprocess.CompletedProcess:
         """Runs a command in the environment."""
         env = self.environment()
-        capture_output = kwargs.get("capture_output", True)
+        capture_output = kwargs.get("capture_output", False)
         if "capture_output" in kwargs:
             del kwargs["capture_output"]
         check = kwargs.get("check", False)
