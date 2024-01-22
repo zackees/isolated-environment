@@ -109,6 +109,14 @@ class RequirementsTesting(unittest.TestCase):
         self.assertIn("package2>=1.0.0", reqs)
         self.assertIn(deps, reqs)
 
+    def test_non_semversion_bug(self) -> None:
+        """Tests non-semversion bug."""
+        reqs = Requirements(["openai-whisper==20231117"])
+        self.assertEqual(len(reqs), 1)
+        self.assertEqual(reqs[0].package_name, "package1")
+        self.assertEqual(reqs[0].enum_operator, "==")
+        self.assertEqual(reqs[0].semversion, "20231117")
+ 
 
 if __name__ == "__main__":
     unittest.main()
