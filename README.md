@@ -66,6 +66,8 @@ def get_environment() -> dict[str, Any]:
     return env
 ```
 
+Any changes to the pip requirements list between runs will invoke a call to `pip install`.
+
 It moves the install of your chosen dependencies from **install time** to **runtime**. The benefit of this is that you can query the system
 and make choices on what needs to be installed. For example in `pip` you can't conditionally install packages based on whether `nvidia-smi` has
 been installed (indicating `cuda` acceleration), but with `isolated-environment` this is straightfoward.
