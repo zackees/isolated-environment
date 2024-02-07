@@ -45,7 +45,7 @@ cp: subprocess.CompletedProcess = isolated_environment_run(
 print(cp.stdout)
 ```
 
-For example, here are options for installing a different version of pytorch depending on the runtime environment:
+Install cuda pytorch when nvidia-smi is found:
 
 ```python
 # This generates an environment that should be passed to subprocess.run(...)
