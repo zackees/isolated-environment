@@ -1,6 +1,10 @@
 # isolated-environment
 
-This is a package isolation library designed specifically for AI developers to solve the problems
+![image](https://github.com/zackees/isolated-environment/assets/6856673/8dab37f1-0c6e-42ec-9680-2013287baa98)
+
+Got pinned dependencies in your python package that make it hard to install? Use isolated-environment to package those up in a runtime `venv` that only your package has access to.
+
+This is a package isolation library designed originally for AI developers to solve the problems
 of AI dependency conflicts introduced by the various `pytorch`/`tensorflow`/etc incompatibilities within and between AI apps.
 
 [![Linting](https://github.com/zackees/isolated-environment/actions/workflows/lint.yml/badge.svg)](https://github.com/zackees/isolated-environment/actions/workflows/lint.yml)
