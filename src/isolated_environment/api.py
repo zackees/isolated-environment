@@ -239,14 +239,24 @@ class IsolatedEnvironment:
         text = kwargs.get("text", universal_newlines)
         if "text" in kwargs:
             del kwargs["text"]
-        if cmd_list and (
-            cmd_list[0] == "python"
-            or cmd_list[0] == "python.exe"
-            or cmd_list[0] == "python3"
+        if (
+            cmd_list
+            and self.full_isolation
+            and (
+                cmd_list[0] == "python"
+                or cmd_list[0] == "python.exe"
+                or cmd_list[0] == "python3"
+            )
         ):
             cmd_list[0] = str(act_env.python)
-        if cmd_list and (
-            cmd_list[0] == "pip" or cmd_list[0] == "pip.exe" or cmd_list[0] == "pip3"
+        if (
+            cmd_list
+            and self.full_isolation
+            and (
+                cmd_list[0] == "pip"
+                or cmd_list[0] == "pip.exe"
+                or cmd_list[0] == "pip3"
+            )
         ):
             cmd_list[0] = str(act_env.pip)
         cp = subprocess.run(
