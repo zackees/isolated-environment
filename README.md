@@ -169,7 +169,7 @@ none of this supplemental license applies to you.
   * 1.2.6 - Update readme
   * 1.2.4 - Now support more build options, instead of just --extra-index-url.
   * 1.2.3 - All builds green with complex dependencies!
-  * 1.2.2 - Tested and fixed complex semversion + build number for isolated_environment
+  * 1.2.2 - Tested and fixed complex version + build number for isolated_environment
   * 1.2.1 - Fixes `isolated_environment()` not installing deps correctly on first go
   * 1.2.0 - Now just use `isolated_environment()`, more simple.
   * 1.0.6 - `exists` -> `installed()`, adds `pip_list()`, adds `clean()`

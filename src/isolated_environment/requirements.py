@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Iterator, List, Tuple, Union
 
-import semver
+from packaging.version import Version
 
 
 class Operator(Enum):
@@ -43,31 +43,13 @@ def comp(a: Any, b: Any) -> bool:
 class VersionBuild:
     """Designed to handle version strings in pip, which can be like 2.1.2+build1"""
 
-    semversion: semver.VersionInfo
-    build: str | None = None
+    version: Version
 
     @staticmethod
     def parse(version: str) -> "VersionBuild":
         """Parses a version string."""
-        if "+" in version:
-            semversion, build = version.split("+")
-        else:
-            semversion = version
-            build = None
-        return VersionBuild(semver.VersionInfo.parse(semversion), build)
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, VersionBuild):
-            return self.semversion == other.semversion and self.build == other.build
-        if isinstance(other, str):
-            return str(self) == other
-        return NotImplemented
-
-    def __str__(self) -> str:
-        out = str(self.semversion)
-        if self.build is not None:
-            out += f"+{self.build}"
-        return out
+        v = Version(version)
+        return VersionBuild(v)
 
 
 @dataclass
@@ -76,14 +58,14 @@ class ParsedReq:
 
     package_name: str
     enum_operator: Operator | None = None
-    semversion: VersionBuild | None = None
+    version: VersionBuild | None = None
     build_options: str | None = None
 
     @staticmethod
     def parse(requirement: str) -> "ParsedReq":
         # Split the requirement string into package name, version and build_options
         operator = None
-        semversion = None
+        version: VersionBuild | None = None
         build_options = None
         if "--" in requirement:
             requirement, build_options = requirement.split("--", 1)
@@ -94,34 +76,34 @@ class ParsedReq:
             build_options = build_options.strip()
         for op in Operator:
             if op.value in requirement:
-                package_name, version = requirement.split(op.value)
+                package_name, version_str = requirement.split(op.value)
                 operator = op
-                semversion = VersionBuild.parse(version)
+                version = VersionBuild.parse(version_str)
                 break
         else:
             package_name = requirement
         # Return a new ParsedRequirement instance
-        return ParsedReq(package_name, operator, semversion, build_options)
+        return ParsedReq(package_name, operator, version, build_options)
 
     def compare(
         self,
         other_package_name: str,
-        other_semversion: VersionBuild | None = None,
+        other_version: VersionBuild | None = None,
         other_build_options: str | None = None,
     ) -> Tuple[bool, bool, bool]:
         """Compares the parsed requirement with another parsed requirement"""
         package_name_matches = comp(self.package_name, other_package_name)
         if not package_name_matches:
             return False, False, False
-        semversion_matches = comp(self.semversion, other_semversion)
+        version_matches = comp(self.version, other_version)
         build_options_matches = comp(self.build_options, other_build_options)
-        return True, semversion_matches, build_options_matches
+        return True, version_matches, build_options_matches
 
     def __str__(self) -> str:
         out = self.package_name
         if self.enum_operator is not None:
             out += str(self.enum_operator)
-            out += str(self.semversion)
+            out += str(self.version)
         if self.build_options is not None:
             out += f" {self.build_options}"
         return out
@@ -130,7 +112,7 @@ class ParsedReq:
         out = self.package_name
         if self.enum_operator is not None:
             out += str(self.enum_operator)
-            out += str(self.semversion)
+            out += str(self.version)
         return out
 
     def get_build_options(self) -> str | None:
@@ -146,14 +128,14 @@ class ParsedReqs:
     def _has_pckg_str(self, line: str) -> bool:
         req = ParsedReq.parse(line)
         for r in self.reqs:
-            matches = r.compare(req.package_name, req.semversion, req.build_options)
+            matches = r.compare(req.package_name, req.version, req.build_options)
             if matches[0]:
                 return all(matches)
         return False
 
     def _has_pckg_req(self, req: ParsedReq) -> bool:
         for r in self.reqs:
-            matches = r.compare(req.package_name, req.semversion, req.build_options)
+            matches = r.compare(req.package_name, req.version, req.build_options)
             if matches[0]:
                 return all(matches)
         return False

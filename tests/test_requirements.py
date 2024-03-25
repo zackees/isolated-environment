@@ -16,7 +16,7 @@ class RequirementsTesting(unittest.TestCase):
         for req in reqs:
             self.assertIn(req.package_name, ["package1", "package2", "package3"])
             self.assertIsNone(req.enum_operator)
-            self.assertIsNone(req.semversion)
+            self.assertIsNone(req.version)
 
     def test_single_package_with_version(self) -> None:
         """Tests single package with version."""
@@ -25,7 +25,7 @@ class RequirementsTesting(unittest.TestCase):
         self.assertEqual(len(reqs), 2)
         self.assertEqual(reqs[0].package_name, "package")
         self.assertEqual(reqs[0].enum_operator, "==")
-        self.assertEqual(reqs[0].semversion, "1.0.0")
+        self.assertEqual(reqs[0].version, "1.0.0")
 
     def test_package_with_greater_less_not_equal_operators(self) -> None:
         """Tests package with greater than, less than, and not equal to operators."""
@@ -34,13 +34,13 @@ class RequirementsTesting(unittest.TestCase):
         self.assertEqual(len(reqs), 3)
         self.assertEqual(reqs[0].package_name, "package1")
         self.assertEqual(reqs[0].enum_operator, ">")
-        self.assertEqual(reqs[0].semversion, "1.0.0")
+        self.assertEqual(reqs[0].version, "1.0.0")
         self.assertEqual(reqs[1].package_name, "package2")
         self.assertEqual(reqs[1].enum_operator, "<")
-        self.assertEqual(reqs[1].semversion, "2.0.0")
+        self.assertEqual(reqs[1].version, "2.0.0")
         self.assertEqual(reqs[2].package_name, "package3")
         self.assertEqual(reqs[2].enum_operator, "!=")
-        self.assertEqual(reqs[2].semversion, "3.0.0")
+        self.assertEqual(reqs[2].version, "3.0.0")
 
     def test_package_with_greater_less_equal_operators(self) -> None:
         """Tests package with greater than or equal to, and less than or equal to operators."""
@@ -49,10 +49,10 @@ class RequirementsTesting(unittest.TestCase):
         self.assertEqual(len(reqs), 2)
         self.assertEqual(reqs[0].package_name, "package1")
         self.assertEqual(reqs[0].enum_operator, ">=")
-        self.assertEqual(reqs[0].semversion, "1.0.0")
+        self.assertEqual(reqs[0].version, "1.0.0")
         self.assertEqual(reqs[1].package_name, "package2")
         self.assertEqual(reqs[1].enum_operator, "<=")
-        self.assertEqual(reqs[1].semversion, "2.0.0")
+        self.assertEqual(reqs[1].version, "2.0.0")
 
     def test_extra_index_url_mismatch(self) -> None:
         """Tests extra index url mismatch."""
@@ -66,13 +66,13 @@ class RequirementsTesting(unittest.TestCase):
         self.assertEqual(len(reqs), 2)
         self.assertEqual(reqs[0].package_name, "package1")
         self.assertEqual(reqs[0].enum_operator, "==")
-        self.assertEqual(reqs[0].semversion, "1.0.0")
+        self.assertEqual(reqs[0].version, "1.0.0")
         self.assertEqual(
             reqs[0].build_options, "--extra-index-url https://pypi.org/simple"
         )
         self.assertEqual(reqs[1].package_name, "package2")
         self.assertEqual(reqs[1].enum_operator, ">=")
-        self.assertEqual(reqs[1].semversion, "1.0.0")
+        self.assertEqual(reqs[1].version, "1.0.0")
         self.assertEqual(
             reqs[1].build_options, "--extra-index-url https://test.pypi.org/simple"
         )
@@ -89,13 +89,13 @@ class RequirementsTesting(unittest.TestCase):
         self.assertEqual(len(reqs), 2)
         self.assertEqual(reqs[0].package_name, "package1")
         self.assertEqual(reqs[0].enum_operator, "==")
-        self.assertEqual(reqs[0].semversion, "1.0.0")
+        self.assertEqual(reqs[0].version, "1.0.0")
         self.assertEqual(
             reqs[0].build_options, "--extra-index-url https://pypi.org/simple"
         )
         self.assertEqual(reqs[1].package_name, "package2")
         self.assertEqual(reqs[1].enum_operator, ">=")
-        self.assertEqual(reqs[1].semversion, "1.0.0")
+        self.assertEqual(reqs[1].version, "1.0.0")
         self.assertIsNone(reqs[1].build_options)
 
     def test_has(self) -> None:
@@ -109,14 +109,14 @@ class RequirementsTesting(unittest.TestCase):
         self.assertIn("package2>=1.0.0", reqs)
         self.assertIn(deps, reqs)
 
-    def test_non_semversion_bug(self) -> None:
-        """Tests non-semversion bug."""
+    def test_non_version_bug(self) -> None:
+        """Tests non-version bug."""
         reqs = Requirements(["openai-whisper==20231117"])
         self.assertEqual(len(reqs), 1)
         self.assertEqual(reqs[0].package_name, "package1")
         self.assertEqual(reqs[0].enum_operator, "==")
-        self.assertEqual(reqs[0].semversion, "20231117")
- 
+        self.assertEqual(reqs[0].version, "20231117")
+
 
 if __name__ == "__main__":
     unittest.main()
