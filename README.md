@@ -104,6 +104,7 @@ none of this supplemental license applies to you.
 
 # Releases
 
+  * 1.3.1 - New `full_isolation` mode to allow packages installed on other parts of the system from binding.
   * 1.3.1 - Update readme.
   * 1.3.0 - Marks a new interface.
   * 1.2.7 - Please use `isolated_environment_run()` instead of `isolated_environment`. The latter has
