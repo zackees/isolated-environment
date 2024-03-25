@@ -103,7 +103,7 @@ This supplemental licensing supersedes any language in the generic license attac
 none of this supplemental license applies to you.
 
 # Releases
-
+  * 1.3.2 - Isolation for pip too so that it doesn't bind to the parent pip.
   * 1.3.1 - New `full_isolation` mode to allow packages installed on other parts of the system from binding.
   * 1.3.1 - Update readme.
   * 1.3.0 - Marks a new interface.

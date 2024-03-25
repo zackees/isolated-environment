@@ -13,6 +13,7 @@ import sys
 import venv
 import warnings
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 from shutil import which
 from typing import Any, Iterator
@@ -30,6 +31,15 @@ WARN_OPERATOR = [  # _todo: implement operator support
     "~=",
     "!=",
 ]
+
+
+@dataclass
+class ActivatedEnvironment:
+    """An activated environment."""
+
+    env: dict[str, str]
+    python: Path
+    pip: Path
 
 
 def _create_virtual_env(env_path: Path) -> Path:
@@ -67,7 +77,9 @@ def _remove_python_paths_from_env(env: dict[str, str]) -> dict[str, str]:
     return out_env
 
 
-def _get_activated_environment(env_path: Path, full_isolation: bool) -> dict[str, str]:
+def _get_activated_environment(
+    env_path: Path, full_isolation: bool
+) -> ActivatedEnvironment:
     """Gets the activate environment for the environment."""
     out_env = os.environ.copy()
     if full_isolation:
@@ -82,7 +94,15 @@ def _get_activated_environment(env_path: Path, full_isolation: bool) -> dict[str
         out_env["PYTHONPATH"] = str(env_path / "Lib" / "site-packages")
     else:
         out_env["PYTHONPATH"] = str(env_path / "lib" / "site-packages")
-    return out_env
+
+    scripts = "Scripts" if sys.platform == "win32" else "bin"
+    python_name = "python.exe" if sys.platform == "win32" else "python"
+    python = env_path / scripts / python_name
+    pip = env_path / scripts / "pip"
+    activate_environment: ActivatedEnvironment = ActivatedEnvironment(
+        env=out_env, python=python, pip=pip
+    )
+    return activate_environment
 
 
 def _pip_install(
@@ -90,13 +110,13 @@ def _pip_install(
 ) -> None:
     """Installs a package in the virtual environment."""
     # Activate the environment and install packages
-    env = _get_activated_environment(env_path, full_isolation)
-    cmd_list = ["pip", "install", package]
+    act_env: ActivatedEnvironment = _get_activated_environment(env_path, full_isolation)
+    cmd_list = [str(act_env.pip), "install", package]
     if build_options:
         cmd_list.extend(build_options.split(" "))
     cmd = subprocess.list2cmdline(cmd_list)
     print(f"Running: {cmd}")
-    subprocess.run(cmd, env=env, shell=True, check=True)
+    subprocess.run(cmd, env=act_env.env, shell=True, check=True)
 
 
 def _package_name(package: str) -> str:
@@ -193,11 +213,12 @@ class IsolatedEnvironment:
 
     def environment(self) -> dict[str, str]:
         """Gets the activated environment, which should be applied to subprocess environments."""
-        return _get_activated_environment(self.env_path, self.full_isolation)
+        return _get_activated_environment(self.env_path, self.full_isolation).env
 
     def run(self, cmd_list: list[str], **kwargs) -> subprocess.CompletedProcess:
         """Runs a command in the environment."""
-        env = self.environment()
+        act_env = _get_activated_environment(self.env_path, self.full_isolation)
+        env = act_env.env
         capture_output = kwargs.get("capture_output", False)
         if "capture_output" in kwargs:
             del kwargs["capture_output"]
@@ -218,14 +239,16 @@ class IsolatedEnvironment:
         text = kwargs.get("text", universal_newlines)
         if "text" in kwargs:
             del kwargs["text"]
-        scripts = "Scripts" if sys.platform == "win32" else "bin"
-        python_name = "python.exe" if sys.platform == "win32" else "python"
         if cmd_list and (
             cmd_list[0] == "python"
             or cmd_list[0] == "python.exe"
             or cmd_list[0] == "python3"
         ):
-            cmd_list[0] = str(self.env_path / scripts / python_name)
+            cmd_list[0] = str(act_env.python)
+        if cmd_list and (
+            cmd_list[0] == "pip" or cmd_list[0] == "pip.exe" or cmd_list[0] == "pip3"
+        ):
+            cmd_list[0] = str(act_env.pip)
         cp = subprocess.run(
             cmd_list,
             env=env,

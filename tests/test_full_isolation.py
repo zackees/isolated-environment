@@ -41,6 +41,13 @@ class FullIoslationTester(unittest.TestCase):
                 # now create an inner environment without the static-ffmpeg
                 cp: subprocess.CompletedProcess = iso_env.run(["python", "inner.py"])
                 self.assertEqual(1, cp.returncode)
+                iso_env.pip_install(
+                    package="isolated-environment",
+                    build_options=None,
+                    full_isolation=True,
+                )
+                cp = iso_env.run(["python", "inner.py"])
+                self.assertEqual(0, cp.returncode)
             finally:
                 os.chdir(prev_dir)
 
