@@ -14,6 +14,7 @@ import venv
 import warnings
 from contextlib import contextmanager
 from pathlib import Path
+from shutil import which
 from typing import Any, Iterator
 
 from filelock import FileLock
@@ -43,9 +44,34 @@ def _create_virtual_env(env_path: Path) -> Path:
     return env_path
 
 
-def _get_activated_environment(env_path: Path) -> dict[str, str]:
+def has_python_or_pip(path: str) -> bool:
+    """Returns True if python or pip is in the path."""
+    python = which("python", path=path) or which("python3", path=path)
+    pip = which("pip", path=path) or which("pip3", path=path)
+    return (python is not None) or (pip is not None)
+
+
+def _remove_python_paths_from_env(env: dict[str, str]) -> dict[str, str]:
+    """Removes PYTHONPATH from the environment."""
+    out_env = env.copy()
+    if "PYTHONPATH" in out_env:
+        del out_env["PYTHONPATH"]
+    path_list = out_env["PATH"].split(os.pathsep)
+
+    exported_path_list: list[str] = []
+    for p in path_list:
+        if not has_python_or_pip(p):
+            exported_path_list.append(p)
+    exported_path_list = [os.path.basename(sys.executable)] + exported_path_list
+    out_env["PATH"] = os.pathsep.join(exported_path_list)
+    return out_env
+
+
+def _get_activated_environment(env_path: Path, full_isolation: bool) -> dict[str, str]:
     """Gets the activate environment for the environment."""
     out_env = os.environ.copy()
+    if full_isolation:
+        out_env = _remove_python_paths_from_env(out_env)
     if sys.platform == "win32":
         out_env["PATH"] = str(env_path / "Scripts") + ";" + out_env["PATH"]
     else:
@@ -60,11 +86,11 @@ def _get_activated_environment(env_path: Path) -> dict[str, str]:
 
 
 def _pip_install(
-    env_path: Path, package: str, build_options: str | None = None
+    env_path: Path, package: str, build_options: str | None, full_isolation: bool
 ) -> None:
     """Installs a package in the virtual environment."""
     # Activate the environment and install packages
-    env = _get_activated_environment(env_path)
+    env = _get_activated_environment(env_path, full_isolation)
     cmd_list = ["pip", "install", package]
     if build_options:
         cmd_list.extend(build_options.split(" "))
@@ -85,15 +111,18 @@ class IsolatedEnvironment:
     """An isolated environment."""
 
     def __init__(
-        self, env_path: Path, requirements: Requirements | None = None
+        self,
+        env_path: Path,
+        requirements: Requirements | None = None,
+        full_isolation: bool = False,  # For absolute isolation, set to False
     ) -> None:
         self.env_path = env_path
+        self.full_isolation = full_isolation
         self.env_path.mkdir(parents=True, exist_ok=True)
         # file_lock is side-by-side with the environment.
         self.file_lock = FileLock(str(env_path) + ".lock")
         self.packages_json = env_path / "packages.json"
-        if requirements is not None:
-            self.ensure_installed(requirements)
+        self.ensure_installed(requirements or Requirements([]))
 
     def install_environment(self) -> None:
         """Installs the environment."""
@@ -141,7 +170,10 @@ class IsolatedEnvironment:
             self.file_lock.release()
 
     def pip_install(
-        self, package: str | list[str], build_options: str | None = None
+        self,
+        package: str | list[str],
+        build_options: str | None,
+        full_isolation: bool,
     ) -> None:
         """Installs a package in the virtual environment."""
         assert (
@@ -150,10 +182,10 @@ class IsolatedEnvironment:
         reqs = self._read_reqs()
         if isinstance(package, list):
             for p in package:
-                _pip_install(self.env_path, p, build_options)
+                _pip_install(self.env_path, p, build_options, full_isolation)
                 reqs.add(package)
         elif isinstance(package, str):
-            _pip_install(self.env_path, package, build_options)
+            _pip_install(self.env_path, package, build_options, full_isolation)
             reqs.add(package)
         else:
             raise TypeError(f"Unknown type for package: {type(package)}")
@@ -161,7 +193,7 @@ class IsolatedEnvironment:
 
     def environment(self) -> dict[str, str]:
         """Gets the activated environment, which should be applied to subprocess environments."""
-        return _get_activated_environment(self.env_path)
+        return _get_activated_environment(self.env_path, self.full_isolation)
 
     def run(self, cmd_list: list[str], **kwargs) -> subprocess.CompletedProcess:
         """Runs a command in the environment."""
@@ -186,6 +218,14 @@ class IsolatedEnvironment:
         text = kwargs.get("text", universal_newlines)
         if "text" in kwargs:
             del kwargs["text"]
+        scripts = "Scripts" if sys.platform == "win32" else "bin"
+        python_name = "python.exe" if sys.platform == "win32" else "python"
+        if cmd_list and (
+            cmd_list[0] == "python"
+            or cmd_list[0] == "python.exe"
+            or cmd_list[0] == "python3"
+        ):
+            cmd_list[0] = str(self.env_path / scripts / python_name)
         cp = subprocess.run(
             cmd_list,
             env=env,
@@ -248,7 +288,11 @@ class IsolatedEnvironment:
                 if req not in prev_reqs:
                     package_str = req.get_package_str()
                     build_options = req.build_options
-                    self.pip_install(package=package_str, build_options=build_options)
+                    self.pip_install(
+                        package=package_str,
+                        build_options=build_options,
+                        full_isolation=self.full_isolation,
+                    )
             self._write_reqs(reqs)
             return self.environment()
 

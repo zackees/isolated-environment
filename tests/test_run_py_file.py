@@ -51,8 +51,10 @@ class MainTester(unittest.TestCase):
         with TemporaryDirectory() as tmp_dir:
             venv_path = Path(tmp_dir) / "venv"
             cp = isolated_environment_run(
-                env_path=venv_path, requirements=[], cmd_list=["python", str(RUN_PY)],
-                capture_output=True
+                env_path=venv_path,
+                requirements=[],
+                cmd_list=["python", str(RUN_PY)],
+                capture_output=True,
             )
             self.assertEqual(0, cp.returncode)
             self.assertEqual("Hello World!\n", cp.stdout)

@@ -3,4 +3,4 @@ set -e
 # cd to self bash script directory
 cd $( dirname ${BASH_SOURCE[0]})
 . ./activate.sh
-pytest
+pytest -n auto -v tests

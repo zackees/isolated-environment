@@ -10,14 +10,18 @@ from .requirements import Requirements  # noqa: F401
 # the python interpreter.  On linux it will drop you into the
 # python interpreter and you will not be able to exit.
 def isolated_environment(
-    env_path: Union[Path, str], requirements: list[str] | None = None
+    env_path: Union[Path, str],
+    requirements: list[str] | None = None,
+    full_isolation: bool = False,
 ) -> dict[str, Any]:
     """Creates an isolated environment."""
     if isinstance(env_path, str):
         env_path = Path(env_path)  # type: ignore
     requirements = requirements or []
     reqs = Requirements(requirements)
-    iso_env = IsolatedEnvironment(env_path, reqs)
+    iso_env = IsolatedEnvironment(
+        env_path=env_path, requirements=reqs, full_isolation=full_isolation
+    )
     env = iso_env.environment()
     return env
 
@@ -26,6 +30,7 @@ def isolated_environment_run(
     env_path: Union[Path, str],
     requirements: list[str] | None,
     cmd_list: list[str],
+    full_isolation: bool = False,
     **kwargs: Any,
 ) -> CompletedProcess:
     """
@@ -40,7 +45,9 @@ def isolated_environment_run(
         env_path = Path(env_path)  # type: ignore
     requirements = requirements or []
     reqs = Requirements(requirements)
-    iso_env = IsolatedEnvironment(env_path, reqs)
+    iso_env = IsolatedEnvironment(
+        env_path=env_path, requirements=reqs, full_isolation=full_isolation
+    )
     iso_env.ensure_installed(reqs)
     cp = iso_env.run(cmd_list, **kwargs)
     return cp

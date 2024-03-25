@@ -1,6 +1,7 @@
 """
 Unit test file.
 """
+
 import unittest
 
 from isolated_environment.requirements import Requirements
