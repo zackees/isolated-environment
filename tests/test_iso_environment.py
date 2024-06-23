@@ -11,7 +11,6 @@ from tempfile import TemporaryDirectory
 from typing import Any
 
 from isolated_environment.api import IsolatedEnvironment
-from isolated_environment.requirements import Requirements
 
 HERE = Path(__file__).parent
 TEST_DIR = HERE / "test"
@@ -22,14 +21,13 @@ def pretty(data: Any) -> str:
     return json.dumps(data, indent=4, sort_keys=True)
 
 
-def get_deps() -> list[str]:
+def get_deps() -> str:
     """Gets the dependencies."""
-    out: list[str] = ["static_ffmpeg --use-pep517"]
+    out: list[str] = ["static_ffmpeg"]
     if sys.platform != "darwin":
-        out.append(
-            "torch==2.1.2+cu121 --extra-index-url https://download.pytorch.org/whl/cu121"
-        )
-    return out
+        out.append("--extra-index-url https://download.pytorch.org/whl/cpu")
+        out.append("torch==2.1.2")
+    return "\n".join(out)
 
 
 class IsolatedEnvironmentTest(unittest.TestCase):
@@ -37,10 +35,10 @@ class IsolatedEnvironmentTest(unittest.TestCase):
 
     def test_ensure_installed(self) -> None:
         """Tests that ensure_installed works."""
-        reqs = Requirements(get_deps())
+        reqs = get_deps()
         with TemporaryDirectory() as tmp_dir:
             iso_env = IsolatedEnvironment(Path(tmp_dir) / "venv")
-            env = iso_env.ensure_installed(reqs)
+            env = iso_env.ensure_installed(reqs, args=["--use-pep517"])
             self.assertTrue(iso_env.installed())
             installed_reqs = iso_env.installed_requirements()
             self.assertEqual(installed_reqs, reqs)

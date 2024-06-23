@@ -20,8 +20,6 @@ from typing import Any, Iterator
 
 from filelock import FileLock
 
-from isolated_environment.requirements import Requirements
-
 WARN_OPERATOR = [  # _todo: implement operator support
     "==",
     ">=",
@@ -105,15 +103,19 @@ def _get_activated_environment(
     return activate_environment
 
 
-def _pip_install(
-    env_path: Path, package: str, build_options: str | None, full_isolation: bool
+def _pip_install_all(
+    env_path: Path, requiresments: str, full_isolation: bool, args: list[str] | None
 ) -> None:
-    """Installs a package in the virtual environment."""
-    # Activate the environment and install packages
-    act_env: ActivatedEnvironment = _get_activated_environment(env_path, full_isolation)
-    cmd_list = [str(act_env.pip), "install", package]
-    if build_options:
-        cmd_list.extend(build_options.split(" "))
+    """Installs all the packages"""
+    act_env = _get_activated_environment(env_path, full_isolation)
+    # write out requirements file
+    req_file = env_path / "requirements.txt"
+    req_file.write_text(requiresments)
+    cmd_list = [str(act_env.pip), "install"]
+    if args:
+        cmd_list += args
+    cmd_list += ["-r"]
+    cmd_list += [str(req_file)]
     cmd = subprocess.list2cmdline(cmd_list)
     print(f"Running: {cmd}")
     subprocess.run(cmd, env=act_env.env, shell=True, check=True)
@@ -133,7 +135,7 @@ class IsolatedEnvironment:
     def __init__(
         self,
         env_path: Path,
-        requirements: Requirements | None = None,
+        requirements: str | None = None,
         full_isolation: bool = False,  # For absolute isolation, set to False
     ) -> None:
         self.env_path = env_path
@@ -141,8 +143,8 @@ class IsolatedEnvironment:
         self.env_path.mkdir(parents=True, exist_ok=True)
         # file_lock is side-by-side with the environment.
         self.file_lock = FileLock(str(env_path) + ".lock")
-        self.packages_json = env_path / "packages.json"
-        self.ensure_installed(requirements or Requirements([]))
+        self.requirements = env_path / "requirements.txt"
+        self.ensure_installed(requirements)
 
     def install_environment(self) -> None:
         """Installs the environment."""
@@ -150,9 +152,6 @@ class IsolatedEnvironment:
             not self.installed()
         ), f"The environment {self.env_path} is already installed."
         self.env_path = _create_virtual_env(self.env_path)
-        # write the packages.json file
-        empty_reqs = Requirements([])
-        self._write_reqs(empty_reqs)
 
     def installed(self) -> bool:
         """Returns True if the environment is installed."""
@@ -167,18 +166,12 @@ class IsolatedEnvironment:
         if self.env_path.exists():
             shutil.rmtree(self.env_path, ignore_errors=True)
 
-    def _read_reqs(self) -> Requirements:
+    def _read_reqs(self) -> str | None:
         """Reads the packages.json file."""
-        if not self.packages_json.exists():
-            return Requirements([])
-        out = self.packages_json.read_text()
-        data = Requirements.from_json(out)
+        data = self.requirements.read_text()
+        if data == "None":
+            return None
         return data
-
-    def _write_reqs(self, reqs: Requirements) -> None:
-        """Writes the packages.json file."""
-        out = reqs.to_json()
-        self.packages_json.write_text(out)
 
     @contextmanager
     def lock(self) -> Iterator[None]:
@@ -188,28 +181,6 @@ class IsolatedEnvironment:
             yield
         finally:
             self.file_lock.release()
-
-    def pip_install(
-        self,
-        package: str | list[str],
-        build_options: str | None,
-        full_isolation: bool,
-    ) -> None:
-        """Installs a package in the virtual environment."""
-        assert (
-            self.env_path.exists()
-        ), f"The environment {self.env_path} doesn't exist, install it first."
-        reqs = self._read_reqs()
-        if isinstance(package, list):
-            for p in package:
-                _pip_install(self.env_path, p, build_options, full_isolation)
-                reqs.add(package)
-        elif isinstance(package, str):
-            _pip_install(self.env_path, package, build_options, full_isolation)
-            reqs.add(package)
-        else:
-            raise TypeError(f"Unknown type for package: {type(package)}")
-        self._write_reqs(reqs)
 
     def environment(self) -> dict[str, str]:
         """Gets the activated environment, which should be applied to subprocess environments."""
@@ -308,27 +279,29 @@ class IsolatedEnvironment:
         return True
 
     # Returns an environment dictionary
-    def ensure_installed(self, reqs: Requirements) -> dict[str, Any]:
+    def ensure_installed(
+        self, reqs: str | None, args: list[str] | None = None
+    ) -> dict[str, Any]:
         """Ensures that the packages are installed."""
         with self.lock():
+            prev_reqs: str | None = (
+                self.requirements.read_text() if self.requirements.exists() else None
+            )
+            if prev_reqs == "None":
+                prev_reqs = None
+            if reqs != prev_reqs:
+                self.clean()
             if not self.installed():
                 self.install_environment()
-            prev_reqs = self._read_reqs()
-            if reqs == prev_reqs:
+            if prev_reqs == reqs:
                 return self.environment()
-            list_reqs = list(reqs)
-            for req in list_reqs:
-                if req not in prev_reqs:
-                    package_str = req.get_package_str()
-                    build_options = req.build_options
-                    self.pip_install(
-                        package=package_str,
-                        build_options=build_options,
-                        full_isolation=self.full_isolation,
-                    )
-            self._write_reqs(reqs)
+            if reqs:
+                # write the requirements
+                self.requirements.write_text(reqs)
+                # install the requirements
+                _pip_install_all(self.env_path, reqs, self.full_isolation, args)
             return self.environment()
 
-    def installed_requirements(self) -> Requirements:
+    def installed_requirements(self) -> str | None:
         """Returns a list of installed requirements."""
         return self._read_reqs()

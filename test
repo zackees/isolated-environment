@@ -1,5 +1,8 @@
 #!/bin/bash
 set -e
+. ./activate.sh
+# install requirements
+pip install -r requirements.testing.txt
 # cd to self bash script directory
 cd $( dirname ${BASH_SOURCE[0]})
 . ./activate.sh

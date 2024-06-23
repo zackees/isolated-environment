@@ -3,7 +3,6 @@ from subprocess import CompletedProcess
 from typing import Any, Union
 
 from .api import IsolatedEnvironment  # noqa: F401
-from .requirements import Requirements  # noqa: F401
 
 
 # Note: be very careful when using shell=True and executing
@@ -18,7 +17,7 @@ def isolated_environment(
     if isinstance(env_path, str):
         env_path = Path(env_path)  # type: ignore
     requirements = requirements or []
-    reqs = Requirements(requirements)
+    reqs = None if not requirements else "\n".join(requirements) + "\n"
     iso_env = IsolatedEnvironment(
         env_path=env_path, requirements=reqs, full_isolation=full_isolation
     )
@@ -44,7 +43,8 @@ def isolated_environment_run(
     if isinstance(env_path, str):
         env_path = Path(env_path)  # type: ignore
     requirements = requirements or []
-    reqs = Requirements(requirements)
+    # reqs = Requirements(requirements)
+    reqs = None if not requirements else "\n".join(requirements) + "\n"
     iso_env = IsolatedEnvironment(
         env_path=env_path, requirements=reqs, full_isolation=full_isolation
     )

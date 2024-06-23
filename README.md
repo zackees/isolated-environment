@@ -103,6 +103,10 @@ This supplemental licensing supersedes any language in the generic license attac
 none of this supplemental license applies to you.
 
 # Releases
+  * 2.0.0 - Requirements internally is now just a text file. Sequantially installing requirements is now no longer
+            possible. Any change to the requirements will cause a full rebuild. This fixes a number of problems
+            with how requirements are handled. This should now be much more robust. However, the old api is slightly
+            incompatible with the new one so a full api breaking version has been issued.
   * 1.3.4 - Isolation for pip too so that it doesn't bind to the parent pip.
   * 1.3.1 - New `full_isolation` mode to allow packages installed on other parts of the system from binding.
   * 1.3.1 - Update readme.
