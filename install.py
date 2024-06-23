@@ -167,12 +167,6 @@ def modify_activate_script() -> None:
 
 
 def main() -> int:
-    in_activated_env = os.environ.get("IN_ACTIVATED_ENV", "0") == "1"
-    if in_activated_env:
-        print(
-            "Cannot install a new environment while in an activated environment. Please launch a new shell and try again."
-        )
-        return 1
     platform_ensure_python_installed()
     parser = argparse.ArgumentParser(description="Install the project.")
     parser.add_argument(
