@@ -1,9 +1,6 @@
 
 #!/bin/bash
 set -e
-function abs_path {
-  (cd "$(dirname '$1')" &>/dev/null && printf "%s/%s" "$PWD" "${1##*/}")
-}
 
 if [[ $(uname -a) == *"Microsoft"* ]]; then
   echo "Running on Windows"
@@ -17,8 +14,8 @@ fi
 if [ ! -d "venv" ]; then
   ./install
 fi
-. $( dirname $(abs_path ${BASH_SOURCE[0]}))/venv/bin/activate
-export PATH=$( dirname $(abs_path ${BASH_SOURCE[0]}))/:$PATH
+source ./venv/bin/activate
+
 
 export IN_ACTIVATED_ENV="1"
 
