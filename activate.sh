@@ -21,3 +21,5 @@ fi
 export PATH=$( dirname $(abs_path ${BASH_SOURCE[0]}))/:$PATH
 
 export IN_ACTIVATED_ENV="1"
+
+set +e

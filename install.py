@@ -66,6 +66,7 @@ if [ ! -d "venv" ]; then
   export PATH="$this_dir:$PATH"
   echo "Environment created."
   pip install -e .
+  set +e
   exit 0
 fi
 
@@ -75,6 +76,7 @@ if [[ "$IN_ACTIVATED_ENV" != "1" ]]; then
   this_dir=$(pwd)
   export PATH="$this_dir:$PATH"
 fi
+set +e
 """
 HERE = os.path.dirname(__file__)
 os.chdir(os.path.abspath(HERE))
