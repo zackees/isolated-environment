@@ -14,7 +14,7 @@ fi
 if [ ! -d "venv" ]; then
   ./install
 fi
-source ./venv/bin/activate
+. ./venv/bin/activate
 
 
 export IN_ACTIVATED_ENV="1"
