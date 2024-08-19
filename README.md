@@ -37,7 +37,7 @@ requirements = [
     f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}"
 ]
 cmd_list = ["whisper", "--help"]
-# Note that shell=False, universal_newlines=True, capture=True
+# Note that shell=False, universal_newlines=True, capture_output=True
 cp: subprocess.CompletedProcess = isolated_environment_run(
     env_path=venv_path,
     requirements=requirements,
