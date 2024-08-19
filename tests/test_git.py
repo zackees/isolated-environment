@@ -11,17 +11,35 @@ import warnings
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from isolated_environment.api import IsolatedEnvironment
+from isolated_environment.api import IsolatedEnvironment, _remove_python_paths_from_env
 
 HERE = Path(__file__).parent.absolute()
 GIT_PATH = shutil.which("git")
 PATH = os.environ["PATH"]
 
 
+def which_all(name: str, paths: list[str]) -> str | None:
+    """Finds the first path that contains the name."""
+    for path in paths:
+        out = shutil.which(name, path=path)
+        if out is not None:
+            return out
+    return None
+
+
 class AiderChatTester(unittest.TestCase):
     """Main tester class."""
 
-    def test_ensure_installed(self) -> None:
+    @unittest.skipIf(GIT_PATH is None, "git is not installed")
+    def test_git_is_not_sliced_out(self) -> None:
+        env = os.environ.copy()
+        env_modified = _remove_python_paths_from_env(env)
+        paths = env_modified["PATH"].split(os.pathsep)
+        path = which_all("git", paths=paths)
+        self.assertIsNotNone(path)
+
+    @unittest.skipIf(GIT_PATH is None, "git is not installed")
+    def test_git_is_still_installed(self) -> None:
         """Tests that ensure_installed works."""
         with TemporaryDirectory() as tmp_dir:
             iso_env = IsolatedEnvironment(
