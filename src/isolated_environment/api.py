@@ -64,14 +64,6 @@ def _remove_python_paths_from_env(env: dict[str, str]) -> dict[str, str]:
     out_env = env.copy()
     if "PYTHONPATH" in out_env:
         del out_env["PYTHONPATH"]
-    path_list = out_env["PATH"].split(os.pathsep)
-
-    exported_path_list: list[str] = []
-    for p in path_list:
-        if not has_python_or_pip(p):
-            exported_path_list.append(p)
-    exported_path_list = [os.path.basename(sys.executable)] + exported_path_list
-    out_env["PATH"] = os.pathsep.join(exported_path_list)
     return out_env
 
 
