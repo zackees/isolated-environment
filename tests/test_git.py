@@ -4,6 +4,7 @@
 Tests against the problem of git not being found on the path.
 """
 import os
+import shutil
 import subprocess
 import unittest
 import warnings
@@ -13,6 +14,7 @@ from tempfile import TemporaryDirectory
 from isolated_environment.api import IsolatedEnvironment
 
 HERE = Path(__file__).parent.absolute()
+GIT_PATH = shutil.which("git")
 
 
 class AiderChatTester(unittest.TestCase):
@@ -30,18 +32,25 @@ class AiderChatTester(unittest.TestCase):
             # now create an inner environment without the static-ffmpeg
             cp: subprocess.CompletedProcess = iso_env.run(["git", "--help"], shell=True)
             if cp.returncode != 0:
-                warnings.warn("git had some sort of a problem, dumping out the system")
-                print(cp.stdout)
-                print(cp.stderr)
+                warning_message = [
+                    "git had some sort of a problem, dumping out the system"
+                ]
+                warning_message.append(f"system git path: {GIT_PATH}")
+                warning_message.append(f"stdout: {cp.stdout}")
+                warning_message.append(f"stderr: {cp.stderr}")
+
                 # print environment variables
                 path = activated_env["PATH"]
-                warnings.warn(f"dumping out the path: {path}")
+                warning_message.append(f"dumping out the path: {path}")
                 for p in path.split(os.pathsep):
-                    warnings.warn(f"Path: {p}")
+                    warning_message.append(f"Path: {p}")
+
                 activated_env.pop("PATH")
-                warnings.warn("dumping out the environment variables")
+                warning_message.append("dumping out the environment variables")
                 for k, v in activated_env.items():
-                    warnings.warn(f"{k}: {v}")
+                    warning_message.append(f"{k}: {v}")
+
+                warnings.warn("\n".join(warning_message))
                 self.fail("git test had some sort of failure")
 
 
