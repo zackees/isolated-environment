@@ -24,7 +24,7 @@ def which_all(name: str, paths: list[str]) -> list[str]:
     for path in paths:
         p = shutil.which(name, path=path)
         if p is not None:
-            out.append(p)
+            out.append(path)
     return out
 
 
