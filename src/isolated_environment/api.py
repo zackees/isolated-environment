@@ -188,12 +188,6 @@ class IsolatedEnvironment:
         check = kwargs.get("check", False)
         if "check" in kwargs:
             del kwargs["check"]
-        if "shell" in kwargs and kwargs["shell"]:
-            if "python" in cmd_list[0]:
-                raise ValueError(
-                    f"shell=True and python in {cmd_list}, this will drop you into "
-                    + "the python interpreter in linux and you will not be able to exit."
-                )
 
         universal_newlines = kwargs.get("universal_newlines", True)
         if "universal_newlines" in kwargs:
@@ -204,11 +198,7 @@ class IsolatedEnvironment:
         if (
             cmd_list
             and self.full_isolation
-            and (
-                cmd_list[0] == "python"
-                or cmd_list[0] == "python.exe"
-                or cmd_list[0] == "python3"
-            )
+            and cmd_list[0].lower().startswith("python")
         ):
             cmd_list[0] = str(act_env.python)
         if (
