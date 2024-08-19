@@ -16,7 +16,7 @@ dependencies = [
     "setuptools",
 ]
 # Change this with the version number bump.
-version = "2.0.1"
+version = "2.0.2"
 
 [tool.ruff]
 line-length = 200

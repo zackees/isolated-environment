@@ -103,6 +103,7 @@ This supplemental licensing supersedes any language in the generic license attac
 none of this supplemental license applies to you.
 
 # Releases
+  * 2.0.2 - Fixed a deep bug with how macos/linux handles subprocess handles a command list with `shell=True`.
   * 2.0.0 - Requirements internally is now just a text file. Sequantially installing requirements is now no longer
             possible. Any change to the requirements will cause a full rebuild. This fixes a number of problems
             with how requirements are handled. This should now be much more robust. However, the old api is slightly
