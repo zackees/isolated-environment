@@ -3,9 +3,10 @@
 """
 Tests against the problem of git not being found on the path.
 """
-
+import os
 import subprocess
 import unittest
+import warnings
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -25,9 +26,23 @@ class AiderChatTester(unittest.TestCase):
                 requirements=None,
                 full_isolation=True,
             )
+            activated_env = iso_env.environment()
             # now create an inner environment without the static-ffmpeg
             cp: subprocess.CompletedProcess = iso_env.run(["git", "--help"], shell=True)
-            self.assertEqual(0, cp.returncode)
+            if cp.returncode != 0:
+                warnings.warn("git had some sort of a problem, dumping out the system")
+                print(cp.stdout)
+                print(cp.stderr)
+                # print environment variables
+                path = activated_env["PATH"]
+                warnings.warn(f"dumping out the path: {path}")
+                for p in path.split(os.pathsep):
+                    warnings.warn(f"Path: {p}")
+                activated_env.pop("PATH")
+                warnings.warn("dumping out the environment variables")
+                for k, v in activated_env.items():
+                    warnings.warn(f"{k}: {v}")
+                self.fail("git test had some sort of failure")
 
 
 if __name__ == "__main__":
