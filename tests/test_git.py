@@ -53,7 +53,9 @@ class AiderChatTester(unittest.TestCase):
             )
             activated_env = iso_env.environment()
             # now create an inner environment without the static-ffmpeg
-            cp: subprocess.CompletedProcess = iso_env.run(["git", "--help"], shell=True)
+            cp: subprocess.CompletedProcess = iso_env.run(
+                ["git", "--version"], shell=True, capture_output=True
+            )
             if cp.returncode != 0:
                 warning_message = [
                     "git had some sort of a problem, dumping out the system"

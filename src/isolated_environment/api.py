@@ -221,8 +221,10 @@ class IsolatedEnvironment:
             )
         ):
             cmd_list[0] = str(act_env.pip)
+        shell = kwargs.get("shell", False)
+        cmd_or_cmd_list = subprocess.list2cmdline(cmd_list) if shell else cmd_list
         cp = subprocess.run(
-            cmd_list,
+            cmd_or_cmd_list,
             env=env,
             check=check,
             text=text,
