@@ -159,7 +159,8 @@ def convert_windows_path_to_git_bash_path(path: str) -> str:
 
 
 def modify_activate_script() -> None:
-    path = os.path.join(HERE, "venv", "bin", "activate")
+    bin = "bin" if sys.platform != "win32" else "Scripts"
+    path = os.path.join(HERE, "venv", bin, "activate")
     abs_path = os.path.abspath(path)
     if sys.platform == "win32":
         abs_path = convert_windows_path_to_git_bash_path(abs_path)

@@ -196,7 +196,6 @@ class IsolatedEnvironment:
         check = kwargs.get("check", False)
         if "check" in kwargs:
             del kwargs["check"]
-        assert "shell" not in kwargs, "shell passed in, we only support shell=False."
         if "shell" in kwargs and kwargs["shell"]:
             if "python" in cmd_list[0]:
                 raise ValueError(
@@ -233,7 +232,6 @@ class IsolatedEnvironment:
         cp = subprocess.run(
             cmd_list,
             env=env,
-            shell=False,
             check=check,
             text=text,
             capture_output=capture_output,
