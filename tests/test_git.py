@@ -18,13 +18,14 @@ GIT_PATH = shutil.which("git")
 PATH = os.environ["PATH"]
 
 
-def which_all(name: str, paths: list[str]) -> str | None:
+def which_all(name: str, paths: list[str]) -> list[str]:
     """Finds the first path that contains the name."""
+    out: list[str] = []
     for path in paths:
-        out = shutil.which(name, path=path)
-        if out is not None:
-            return out
-    return None
+        p = shutil.which(name, path=path)
+        if p is not None:
+            out.append(p)
+    return out
 
 
 class AiderChatTester(unittest.TestCase):
@@ -34,11 +35,12 @@ class AiderChatTester(unittest.TestCase):
     def test_git_is_not_sliced_out(self) -> None:
         env = os.environ.copy()
         our_paths = env["PATH"].split(os.pathsep)
-        self.assertIsNotNone(which_all("git", paths=our_paths))
+        paths_with_git = which_all("git", paths=our_paths)
+        self.assertGreater(len(paths_with_git), 0)
         env_modified = _remove_python_paths_from_env(env)
         paths = env_modified["PATH"].split(os.pathsep)
-        path = which_all("git", paths=paths)
-        self.assertIsNotNone(path)
+        new_paths_with_git = which_all("git", paths=paths)
+        self.assertGreater(len(new_paths_with_git), 0)
 
     @unittest.skipIf(GIT_PATH is None, "git is not installed")
     def test_git_is_still_installed(self) -> None:
