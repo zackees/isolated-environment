@@ -15,6 +15,7 @@ from isolated_environment.api import IsolatedEnvironment
 
 HERE = Path(__file__).parent.absolute()
 GIT_PATH = shutil.which("git")
+PATH = os.environ["PATH"]
 
 
 class AiderChatTester(unittest.TestCase):
@@ -36,6 +37,9 @@ class AiderChatTester(unittest.TestCase):
                     "git had some sort of a problem, dumping out the system"
                 ]
                 warning_message.append(f"system git path: {GIT_PATH}")
+                warning_message.append("system path:")
+                for p in PATH.split(os.pathsep):
+                    warning_message.append(f"  {p}")
                 warning_message.append(f"stdout: {cp.stdout}")
                 warning_message.append(f"stderr: {cp.stderr}")
 
@@ -43,7 +47,7 @@ class AiderChatTester(unittest.TestCase):
                 path = activated_env["PATH"]
                 warning_message.append(f"dumping out the path: {path}")
                 for p in path.split(os.pathsep):
-                    warning_message.append(f"Path: {p}")
+                    warning_message.append(f"  {p}")
 
                 activated_env.pop("PATH")
                 warning_message.append("dumping out the environment variables")
