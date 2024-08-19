@@ -33,6 +33,8 @@ class AiderChatTester(unittest.TestCase):
     @unittest.skipIf(GIT_PATH is None, "git is not installed")
     def test_git_is_not_sliced_out(self) -> None:
         env = os.environ.copy()
+        our_paths = env["PATH"].split(os.pathsep)
+        self.assertIsNotNone(which_all("git", paths=our_paths))
         env_modified = _remove_python_paths_from_env(env)
         paths = env_modified["PATH"].split(os.pathsep)
         path = which_all("git", paths=paths)
