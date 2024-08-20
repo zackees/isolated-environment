@@ -80,10 +80,8 @@ def _get_activated_environment(
         out_env["PATH"] = str(env_path / "bin") + ":" + out_env["PATH"]
 
     # set PYTHONPATH to make sure Python finds installed packages
-    if sys.platform == "win32":
-        out_env["PYTHONPATH"] = str(env_path / "Lib" / "site-packages")
-    else:
-        out_env["PYTHONPATH"] = str(env_path / "lib" / "site-packages")
+    out_env["PYTHONPATH"] = str(env_path / "lib" / "site-packages")
+
 
     scripts = "Scripts" if sys.platform == "win32" else "bin"
     python_name = "python.exe" if sys.platform == "win32" else "python"
