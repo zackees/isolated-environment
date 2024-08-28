@@ -11,7 +11,7 @@ import warnings
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from isolated_environment.api import IsolatedEnvironment, _remove_python_paths_from_env
+from isolated_environment.api import IsolatedEnvironment
 
 HERE = Path(__file__).parent.absolute()
 GIT_PATH = shutil.which("git")
@@ -30,17 +30,6 @@ def which_all(name: str, paths: list[str]) -> list[str]:
 
 class AiderChatTester(unittest.TestCase):
     """Main tester class."""
-
-    @unittest.skipIf(GIT_PATH is None, "git is not installed")
-    def test_git_is_not_sliced_out(self) -> None:
-        env = os.environ.copy()
-        our_paths = env["PATH"].split(os.pathsep)
-        paths_with_git = which_all("git", paths=our_paths)
-        self.assertGreater(len(paths_with_git), 0)
-        env_modified = _remove_python_paths_from_env(env)
-        paths = env_modified["PATH"].split(os.pathsep)
-        new_paths_with_git = which_all("git", paths=paths)
-        self.assertGreater(len(new_paths_with_git), 0)
 
     @unittest.skipIf(GIT_PATH is None, "git is not installed")
     def test_git_is_still_installed(self) -> None:

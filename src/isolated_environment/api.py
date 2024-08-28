@@ -20,15 +20,7 @@ from typing import Any, Iterator
 
 from filelock import FileLock
 
-WARN_OPERATOR = [  # _todo: implement operator support
-    "==",
-    ">=",
-    "<=",
-    ">",
-    "<",
-    "~=",
-    "!=",
-]
+WARNED_ONCE = int(os.environ.get("SILENCE_FULL_ISOLATION_WARNING", "0")) == 1
 
 
 @dataclass
@@ -59,29 +51,18 @@ def has_python_or_pip(path: str) -> bool:
     return (python is not None) or (pip is not None)
 
 
-def _remove_python_paths_from_env(env: dict[str, str]) -> dict[str, str]:
-    """Removes PYTHONPATH from the environment."""
-    out_env = env.copy()
-    if "PYTHONPATH" in out_env:
-        del out_env["PYTHONPATH"]
-    return out_env
-
-
 def _get_activated_environment(
     env_path: Path, full_isolation: bool
 ) -> ActivatedEnvironment:
     """Gets the activate environment for the environment."""
-    out_env = os.environ.copy()
+    global WARNED_ONCE  # pylint: disable=global-statement
     if full_isolation:
-        out_env = _remove_python_paths_from_env(out_env)
-    if sys.platform == "win32":
-        out_env["PATH"] = str(env_path / "Scripts") + ";" + out_env["PATH"]
-    else:
-        out_env["PATH"] = str(env_path / "bin") + ":" + out_env["PATH"]
-
-    # set PYTHONPATH to make sure Python finds installed packages
-    out_env["PYTHONPATH"] = str(env_path / "lib" / "site-packages")
-
+        if not WARNED_ONCE:
+            warnings.warn("Warning: full_isolation is deprecated and now ignored.")
+            WARNED_ONCE = True
+    out_env = os.environ.copy()
+    # set VIRTUAL_ENV to make sure Python finds the correct packages
+    out_env["VIRTUAL_ENV"] = str(env_path)
     scripts = "Scripts" if sys.platform == "win32" else "bin"
     python_name = "python.exe" if sys.platform == "win32" else "python"
     python = env_path / scripts / python_name
@@ -108,14 +89,6 @@ def _pip_install_all(
     cmd = subprocess.list2cmdline(cmd_list)
     print(f"Running: {cmd}")
     subprocess.run(cmd, env=act_env.env, shell=True, check=True)
-
-
-def _package_name(package: str) -> str:
-    """Splits a package into name and version."""
-    for f in WARN_OPERATOR:
-        if f in package:
-            return package.split(f)[0]
-    return package
 
 
 class IsolatedEnvironment:
@@ -192,22 +165,6 @@ class IsolatedEnvironment:
         text = kwargs.get("text", universal_newlines)
         if "text" in kwargs:
             del kwargs["text"]
-        if (
-            cmd_list
-            and self.full_isolation
-            and cmd_list[0].lower().startswith("python")
-        ):
-            cmd_list[0] = str(act_env.python)
-        if (
-            cmd_list
-            and self.full_isolation
-            and (
-                cmd_list[0] == "pip"
-                or cmd_list[0] == "pip.exe"
-                or cmd_list[0] == "pip3"
-            )
-        ):
-            cmd_list[0] = str(act_env.pip)
         shell = kwargs.get("shell", False)
         cmd_or_cmd_list = subprocess.list2cmdline(cmd_list) if shell else cmd_list
         cp = subprocess.run(
@@ -244,16 +201,8 @@ class IsolatedEnvironment:
         """Returns True if the packages are installed."""
         pip_list = self.pip_list()
         pip_list_names = [p["name"] for p in pip_list]  # type: ignore
-        for p in packages:
-            for f in WARN_OPERATOR:
-                if f in p:
-                    warnings.warn(
-                        f"Warning: The package {p} has an operator {f} in "
-                        + "it and we don't support version matching yet."
-                    )
         for package in packages:
-            package_name = _package_name(package)
-            if package_name not in pip_list_names:
+            if package not in pip_list_names:
                 return False
         return True
 

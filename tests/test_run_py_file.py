@@ -17,7 +17,6 @@ RUN_PY = HERE / "run.py"
 class MainTester(unittest.TestCase):
     """Main tester class."""
 
-    @unittest.skip("DO NOT USE shell=True for python!!!")
     def test_shell(self) -> None:
         """Test command line interface (CLI)."""
         with TemporaryDirectory() as tmp_dir:
