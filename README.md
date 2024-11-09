@@ -15,7 +15,7 @@ It's going to be called iso-env
 
 It runs on UV and basically solves all the problems. But it needs a "trampoline" python script to make it work right.
 
-Basically the red build badges indicate that I found some nasty bug in the platform and added a test but didn't fix it. The chances this code base actually works on macos/linux is super high, as the tests here are pretty comprehensive.
+The red build badges indicate that I found some nasty bug in the platform and added a test but didn't fix it. The chances this code base actually works on macos/linux is super high, as the tests here are pretty comprehensive.
 
 # Summary
 
