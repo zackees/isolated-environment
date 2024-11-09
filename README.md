@@ -7,6 +7,16 @@
 
 ![image](https://github.com/zackees/isolated-environment/assets/6856673/8dab37f1-0c6e-42ec-9680-2013287baa98)
 
+# Update
+
+UV came in and change the game. Nothing more to be done on this codebase, because I've got a prototype of the successor to isolated-environment currently tested in my advanced-aicode repository.
+
+It's going to be called iso-env
+
+It runs on UV and basically solves all the problems. But it needs a "trampoline" python script to make it work right.
+
+Basically the red build badges indicate that I found some nasty bug in the platform and added a test but didn't fix it. The chances this code base actually works on macos/linux is super high, as the tests here are pretty comprehensive.
+
 # Summary
 
 Got pinned dependencies in your python package that make it hard to install? Use isolated-environment to package those up in a runtime `venv` that only your package has access to.
