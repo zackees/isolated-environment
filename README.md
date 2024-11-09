@@ -9,7 +9,7 @@
 
 # Update
 
-UV came in and change the game. Nothing more to be done on this codebase, because I've got a prototype of the successor to isolated-environment currently tested in my advanced-aicode repository.
+UV came in and changed the game. Nothing more to be done on this codebase, because I've got a prototype of the successor to isolated-environment currently tested in my advanced-aicode repository.
 
 It's going to be called iso-env
 
