@@ -1,6 +1,6 @@
 # isolated-environment
 
-isolated-environment is dead. Long live [uv-iso-env](https://github.com/zackees/isolated-environment), it's successor.
+*isolated-environment is dead. Long live [uv-iso-env](https://github.com/zackees/isolated-environment), it's successor.*
 
 
 [![Linting](https://github.com/zackees/isolated-environment/actions/workflows/lint.yml/badge.svg)](https://github.com/zackees/isolated-environment/actions/workflows/lint.yml)
