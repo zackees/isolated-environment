@@ -116,6 +116,7 @@ This supplemental licensing supersedes any language in the generic license attac
 none of this supplemental license applies to you.
 
 # Releases
+  * 2.0.5 - Added deprecation notice. No more developement will happen with this package. Instead use my better version built on top of the amazing `uv` package: https://github.com/zackees/iso-env, which fixes all the problems.
   * 2.0.3 - Fixed a win32 bug related to finding site packages.
   * 2.0.2 - Fixed a deep bug with how macos/linux handles subprocess handles a command list with `shell=True`.
   * 2.0.0 - Requirements internally is now just a text file. Sequantially installing requirements is now no longer
